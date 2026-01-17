@@ -3,6 +3,9 @@
 require "json"
 require "yaml"
 
+puts "==> Preparing database..."
+system "bin/rails db:prepare"
+
 class ProcessMonitor
   SIGNALS = %w[ INT TERM CLD ]
 

@@ -73,20 +73,16 @@ git push origin main
 caprover deploy -b main
 ```
 
-### 5. Run Database Migrations
+### 4. Run Database Migrations
 
-After first deployment:
+**Migrations run automatically!** 🚀
+The application is configured to run `bin/rails db:prepare` automatically when it starts up. This command will:
 
-```bash
-# SSH into the container
-caprover exec newinternet
+- Create the database if it doesn't exist
+- Run any pending migrations
+- Run seeds if creating the DB for the first time
 
-# Run migrations
-bin/rails db:migrate
-
-# Exit container
-exit
-```
+You can verify the output in the Caprover deployment logs.
 
 ## Post-Deployment
 
