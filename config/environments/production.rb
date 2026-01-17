@@ -93,4 +93,7 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   config.active_job.queue_adapter = :resque
+
+  # Allow ActionCable access from the production domain
+  config.action_cable.allowed_request_origins = [ /http:\/\/localhost.*/, /https:\/\/newinternet\.zaur\.app/, /https:\/\/.*\.zaur\.app/ ]
 end
