@@ -87,6 +87,11 @@ class FirstRunsController < ApplicationController
   private
 
   def prevent_repeats
-    redirect_to root_url if Account.any?
+    if Account.any?
+      respond_to do |format|
+        format.html { redirect_to root_url }
+        format.json { render json: { error: "Setup already completed" }, status: :forbidden }
+      end
+    end
   end
 end
