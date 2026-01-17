@@ -17,6 +17,8 @@ RAILS_ENV=production
 SECRET_KEY_BASE=<generate with: openssl rand -hex 64>
 WEBAUTHN_ORIGIN=https://your-domain.com
 WEBAUTHN_RP_ID=your-domain.com
+VAPID_PUBLIC_KEY=<generate with: npx web-push generate-vapid-keys>
+VAPID_PRIVATE_KEY=<generate with: npx web-push generate-vapid-keys>
 ```
 
 ### Database (if using external PostgreSQL)
@@ -151,6 +153,7 @@ Caprover doesn't support multiple container instances out of the box. For scalin
 - Ensure HTTPS is enabled
 - Verify `WEBAUTHN_ORIGIN` matches your domain (https://...)
 - Verify `WEBAUTHN_RP_ID` matches your domain (without https://)
+- Verify `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` are set for push notifications
 
 ## Production Checklist
 
@@ -158,6 +161,7 @@ Caprover doesn't support multiple container instances out of the box. For scalin
 - [ ] HTTPS enabled and forced
 - [ ] WEBAUTHN_ORIGIN and WEBAUTHN_RP_ID configured
 - [ ] Persistent storage mounted at `/rails/storage`
+- [ ] VAPID keys generated and set
 - [ ] Database migrations run
 - [ ] First admin account created
 - [ ] Logs monitored for errors
