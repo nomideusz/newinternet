@@ -35,6 +35,7 @@ gem "sentry-rails"
 
 # Other
 gem "bcrypt"
+gem "webauthn", "~> 3.0"
 gem "web-push"
 gem "rqrcode"
 gem "rails_autolink"
@@ -44,6 +45,8 @@ gem "net-http-persistent"
 gem "kredis"
 gem "platform_agent"
 gem "thruster"
+gem "tzinfo-data", platforms: %i[ windows jruby ]
+
 
 group :development, :test do
   gem "debug"

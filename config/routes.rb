@@ -1,9 +1,16 @@
 Rails.application.routes.draw do
   root "welcome#show"
 
-  resource :first_run
+  # First-run setup (WebAuthn registration for first admin)
+  resource :first_run, only: %i[ show ] do
+    post :options, on: :member   # Generate WebAuthn creation options
+    post :create, on: :member    # Complete registration with credential
+  end
 
-  resource :session do
+  # Session management (WebAuthn authentication)
+  resource :session, only: %i[ new destroy ] do
+    post :options, on: :collection  # Generate WebAuthn assertion options
+    post :create, on: :collection   # Verify assertion and create session
     scope module: "sessions" do
       resources :transfers, only: %i[ show update ]
     end
@@ -29,8 +36,10 @@ Rails.application.routes.draw do
     route_for :account_logo, v: Current.account&.updated_at&.to_fs(:number), size: options[:size]
   end
 
-  get "join/:join_code", to: "users#new", as: :join
-  post "join/:join_code", to: "users#create"
+  # Registration via join code (WebAuthn registration)
+  get "join/:join_code", to: "registrations#new", as: :join
+  post "join/:join_code/options", to: "registrations#options", as: :join_options
+  post "join/:join_code/callback", to: "registrations#callback", as: :join_callback
 
   resources :qr_code, only: :show
 

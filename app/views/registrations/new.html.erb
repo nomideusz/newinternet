@@ -1,11 +1,11 @@
-<% @page_title = "Set up New Internet" %>
+<% @page_title = "Join #{Current.account.name}" %>
 <% @body_class = "signup" %>
 
 <div class="center max-width"
      data-controller="webauthn"
-     data-webauthn-mode-value="firstrun"
-     data-webauthn-options-url-value="<%= first_run_options_path %>"
-     data-webauthn-callback-url-value="<%= first_run_path %>">
+     data-webauthn-mode-value="register"
+     data-webauthn-options-url-value="<%= join_options_path(@join_code) %>"
+     data-webauthn-callback-url-value="<%= join_callback_path(@join_code) %>">
 
   <section class="nametag u-relative">
     <div class="flex justify-center align-center pad-block">
@@ -14,7 +14,7 @@
 
     <form data-action="submit->webauthn#authenticate" class="nametag__inner flex flex-column gap">
       <fieldset class="flex flex-column center-block">
-        <legend class="txt-large txt-align-center"><strong><%= @page_title %></strong></legend>
+        <legend class="txt-large txt-align-center"><strong>Join <%= Current.account.name %></strong></legend>
 
         <p class="txt-danger txt-align-center" data-webauthn-target="error" hidden></p>
 

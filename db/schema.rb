@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.2].define(version: 2025_12_12_154340) do
+ActiveRecord::Schema[8.2].define(version: 2026_01_17_010001) do
   create_table "accounts", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "custom_styles"
@@ -154,8 +154,22 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_12_154340) do
     t.integer "role", default: 0, null: false
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.string "username"
     t.index ["bot_token"], name: "index_users_on_bot_token", unique: true
-    t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["email_address"], name: "index_users_on_email_address"
+    t.index ["username"], name: "index_users_on_username", unique: true
+  end
+
+  create_table "webauthn_credentials", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "external_id", null: false
+    t.string "nickname"
+    t.text "public_key", null: false
+    t.bigint "sign_count", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["external_id"], name: "index_webauthn_credentials_on_external_id", unique: true
+    t.index ["user_id"], name: "index_webauthn_credentials_on_user_id"
   end
 
   create_table "webhooks", force: :cascade do |t|
@@ -175,6 +189,7 @@ ActiveRecord::Schema[8.2].define(version: 2025_12_12_154340) do
   add_foreign_key "push_subscriptions", "users"
   add_foreign_key "searches", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "webauthn_credentials", "users"
   add_foreign_key "webhooks", "users"
 
   # Virtual tables defined in this database.

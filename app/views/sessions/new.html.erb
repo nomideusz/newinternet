@@ -2,35 +2,43 @@
 <% turbo_page_requires_reload %>
 
 <section class="txt-align-center">
-  <div class="panel <%= "shake" if flash[:alert] %>">
+  <div class="panel <%= "shake" if flash[:alert] %>"
+       data-controller="webauthn"
+       data-webauthn-mode-value="login"
+       data-webauthn-options-url-value="<%= session_options_path %>"
+       data-webauthn-callback-url-value="<%= session_path %>">
+
     <%= account_logo_tag style: "center margin-block-end txt-xx-large" %>
 
-    <%= form_with url: session_url, class: "flex flex-column gap" do |form| %>
+    <form data-action="submit->webauthn#authenticate" class="flex flex-column gap">
       <fieldset class="flex flex-column gap center-block upad">
         <legend class="txt-large txt-align-center"><strong><%= Current.account.name %></strong></legend>
 
+        <p class="txt-danger txt-align-center" data-webauthn-target="error" hidden></p>
+
         <div class="flex align-center gap">
-          <%= translation_button(:email_address) %>
+          <%= translation_button(:username) %>
           <label class="flex align-center gap input input--actor txt-large">
-            <%= form.email_field :email_address, required: true, class: "input", autofocus: true, autocomplete: "username", placeholder: "Enter your email address", value: params[:email_address] %>
-            <%= image_tag "email.svg", aria: { hidden: "true" }, size: 24, class: "colorize--black" %>
+            <input type="text"
+                   name="username"
+                   required
+                   class="input"
+                   autofocus
+                   autocomplete="username webauthn"
+                   placeholder="Enter your username"
+                   data-webauthn-target="username">
+            <%= image_tag "person.svg", aria: { hidden: "true" }, size: 24, class: "colorize--black" %>
           </label>
         </div>
 
-        <div class="flex align-center gap">
-          <%= translation_button(:password) %>
-          <label class="flex align-center gap input input--actor txt-large">
-            <%= form.password_field :password, required: true, class: "input", autocomplete: "current-password", placeholder: "Enter your password", maxlength: 72 %>
-            <%= image_tag "password.svg", aria: { hidden: "true" }, size: 24, class: "colorize--black" %>
-          </label>
-        </div>
-
-        <%= form.button class: "btn btn--reversed center txt-large", type: "submit", name: "log_in" do %>
+        <button class="btn btn--reversed center txt-large"
+                type="submit"
+                data-webauthn-target="submit">
           <%= image_tag "arrow-right.svg", aria: { hidden: "true" } %>
-          <span class="for-screen-reader">Go</span>
-        <% end %>
+          <span>Sign in with Passkey</span>
+        </button>
       </fieldset>
-    <% end %>
+    </form>
   </div>
 
   <%= render "accounts/help_contact" %>
