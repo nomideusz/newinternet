@@ -4,6 +4,12 @@
 ARG RUBY_VERSION=3.4.5
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
+# Silence build warnings for args passed by Caprover but unused in build
+ARG RAILS_ENV
+ARG SECRET_KEY_BASE
+ARG WEBAUTHN_ORIGIN
+ARG WEBAUTHN_RP_ID
+
 # Rails app lives here
 WORKDIR /rails
 
