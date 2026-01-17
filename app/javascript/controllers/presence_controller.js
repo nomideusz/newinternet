@@ -74,7 +74,9 @@ export default class extends Controller {
   }
 
   #refresh = () => {
-    this.channel.send({ action: "refresh" })
+    if (this.connected) {
+      this.channel.send({ action: "refresh" })
+    }
   }
 
   get #isVisible() {
