@@ -9,7 +9,10 @@ class UsersController < ApplicationController
   end
 
   def create
-    @user = User.create!(user_params)
+    user_p = user_params
+    user_p[:name] ||= user_p[:username]
+
+    @user = User.create!(user_p)
     start_new_session_for @user
     redirect_to root_url
   rescue ActiveRecord::RecordNotUnique
@@ -29,6 +32,6 @@ class UsersController < ApplicationController
     end
 
     def user_params
-      params.require(:user).permit(:name, :avatar, :email_address, :password)
+      params.require(:user).permit(:name, :username, :avatar, :email_address, :password)
     end
 end

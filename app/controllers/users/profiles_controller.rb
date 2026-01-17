@@ -17,7 +17,7 @@ class Users::ProfilesController < ApplicationController
     end
 
     def user_params
-      params.require(:user).permit(:name, :avatar, :bio).compact
+      params.require(:user).permit(:avatar, :bio).compact
     end
 
     def update_notice

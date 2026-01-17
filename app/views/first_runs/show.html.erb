@@ -36,18 +36,7 @@
           </label>
         </div>
 
-        <div class="flex align-center gap margin-block-start">
-          <%= translation_button(:name) %>
-          <label class="flex align-center gap flex-item-grow txt-large input input--actor">
-            <input type="text"
-                   name="name"
-                   class="input"
-                   autocomplete="name"
-                   placeholder="Your display name"
-                   data-webauthn-target="name">
-            <%= image_tag "person.svg", aria: { hidden: "true" }, size: 20, class: "colorize--black" %>
-          </label>
-        </div>
+        <!-- Name field removed -->
 
         <p class="txt-small txt-muted txt-align-center margin-block">
           Your device will prompt you to create a passkey.<br>
@@ -58,7 +47,7 @@
                 type="submit"
                 data-webauthn-target="submit">
           <%= image_tag "arrow-right.svg", aria: { hidden: "true" } %>
-          <span>Create Account with Passkey</span>
+          <span>Create Account</span>
         </button>
       </fieldset>
     </form>

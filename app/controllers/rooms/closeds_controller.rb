@@ -62,7 +62,7 @@ class Rooms::ClosedsController < RoomsController
 
     def broadcast_update_room
       each_user_and_html_for(@room) do |user, html|
-        broadcast_replace_to user, :rooms, target: [ @room, :list ], html: html
+        broadcast_replace_to user, :rooms, target: "room_#{@room.id}_list", html: html
       end
     end
 

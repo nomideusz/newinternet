@@ -50,13 +50,12 @@
   <%= profile_form_with @user do |form| %>
     <div class="flex flex-column gap">
       <div class="flex align-center gap">
-        <%= translation_button(:user_name) %>
+        <%= translation_button(:user_name_full) %>
 
-        <label class="flex align-center gap flex-item-grow input input--actor">
-          <%= form.text_field :name, class: "input txt-large ", autocomplete: "name", placeholder: "Enter your name",
-                autofocus: true, required: true,  data: { "1p-ignore": true } %>
+        <div class="flex align-center gap flex-item-grow input input--actor input--disabled">
+          <span class="input txt-large flex align-center"><%= @user.username %></span>
           <%= image_tag "person.svg", aria: { hidden: "true" }, size: 24, class: "colorize--black" %>
-        </label>
+        </div>
       </div>
 
       <div class="flex align-start gap">

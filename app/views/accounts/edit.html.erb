@@ -1,4 +1,4 @@
-<% @page_title = "Account settings" %>
+<% @page_title = "Global Account Settings" %>
 
 <% content_for :nav do %>
   <div class="flex-item-justify-start">
@@ -54,7 +54,7 @@
         <%= translation_button(:account_name) %>
 
         <label class="flex align-center gap flex-item-grow">
-          <%= form.text_field :name, class: "input txt-large", autocomplete: "off", placeholder: "Name this account", autofocus: true,
+          <%= form.text_field :name, class: "input txt-large", autocomplete: "off", placeholder: "Organization Name", autofocus: true,
                 data: { action: "keydown.enter->form#submit" } %>
         </label>
 
