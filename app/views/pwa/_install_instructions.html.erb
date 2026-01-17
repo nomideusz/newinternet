@@ -2,40 +2,53 @@
   <details class="notifications-help pwa__instructions hide-in-pwa" data-controller="pwa-install" data-pwa-install-prompting-class="pwa--can-install" data-notifications-target="details">
     <summary class="btn">
       <%= image_tag "external/install.svg", aria: { hidden: "true" }, size: 20 %>
-      <strong>Install Campfire as a web app.</strong>
+      <strong>Install New Internet as a web app.</strong>
       <%= image_tag "disclosure.svg", aria: { hidden: "true" }, size: 10, class: "disclosure" %>
     </summary>
 
-    <% case
-      when platform.edge? %>
-        <ol>
-          <li>Click <em><%= image_tag "install-edge.svg", alt: "the app available - install Campfire chat button", size: 16 %></em>in the address bar.</li>
+    <% if platform.apple_messages? %>
+  <div class="panel">
+    <h1>Install</h1>
+    <p class="margin-none-block-end">
+      <strong>Install New Internet as a web app.</strong>
+    </p>
+
+    <ol class="steps">
+      <% if platform.desktop? %>
+        <% if platform.chrome? or platform.edge? %>
+          <li>Click <em><%= image_tag "install-edge.svg", alt: "the app available - install New Internet chat button", size: 16 %></em>in the address bar.</li>
           <li>Click <em>Install</em>.</li>
-        </ol>
-      <% when platform.chrome? && platform.android? %>
-        <ol>
-          <li>Tap the <em><%= image_tag "menu-dots-vertical.svg", alt: "More options", size: 16 %></em> menu button.</li>
-          <li>Tap <em>Install app</em> in the menu.</li>
-        </ol>
-      <% when platform.firefox? && platform.android? %>
-        <ol>
-          <li>Tap the <em><%= image_tag "menu-dots-vertical.svg", alt: "More options", size: 16 %></em> menu button.</li>
-          <li>Tap <em>Install</em> in the menu.</li>
-        </ol>
-      <% when platform.safari? && platform.desktop? %>
-        <ol>
-          <li>Click <em>File</em> in the top left.</li>
-          <li>Click <em>Add to Dock…</em>.</li>
-        </ol>
-      <% when (platform.safari? || platform.chrome?) && platform.ios? %>
-        <p>To receive push notifications in <%= platform.browser.capitalize %> for <%= platform.operating_system %>, you must install Campfire as a web app.</p>
-        <ol>
-          <li>Tap <em><%= image_tag "external/share.svg", alt: "the share button", size: 20 %></em></li>
-          <li>Tap <em>Add to Home Screen</em>.</li>
-        </ol>
-      <% else %>
-        <p>Some platforms require you to install Campfire as a web app to receive push notifications.</p>
+        <% elsif platform.safari? %>
+          <li>Click the <em>Share <%= image_tag "apple-share.svg", alt: "apple share icon", size: 16 %></em> button.</li>
+          <li>Click <em>Add to Dock</em>.</li>
+          <li>Click <em>Add</em>.</li>
+        <% end %>
+      <% elsif platform.ios? %>
+        <li>Tap the <em>Share <%= image_tag "apple-share.svg", alt: "apple share icon", size: 18 %></em> button.</li>
+        <li>Scroll down and tap <em>Add to Home Screen</em>.</li>
+        <li>Tap <em>Add</em>.</li>
+      <% elsif platform.android? %>
+        <li>Tap the <em>Menu <%= image_tag "android-menu.svg", alt: "android menu icon", size: 18 %></em> button.</li>
+        <li>Tap <em>Install app</em>.</li>
+        <li>Tap <em>Install</em>.</li>
+      <% end %>
+    </ol>
+
+    <% if platform.chrome? or platform.edge? %>
+      <hr>
+      <div class="txt-subtle">
+        <p>To receive push notifications in <%= platform.browser.capitalize %> for <%= platform.operating_system %>, you must install New Internet as a web app.</p>
+        <p>After installing, you can verify your notification settings.</p>
+      </div>
+    <% elsif platform.ios? %>
+      <hr>
+      <div class="txt-subtle">
+        <p>Some platforms require you to install New Internet as a web app to receive push notifications.</p>
+        <p>After installing, you can verify your notification settings.</p>
+      </div>
     <% end %>
+  </div>
+<% end %>
 
     <div class="margin-block-start txt-align-center pwa__installer">
       <hr class="separator margin-block">
