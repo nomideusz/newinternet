@@ -2,10 +2,9 @@ Rails.application.routes.draw do
   root "welcome#show"
 
   # First-run setup (WebAuthn registration for first admin)
-  resource :first_run, only: %i[ show ] do
-    post :options, on: :member   # Generate WebAuthn creation options
-    post :create, on: :member    # Complete registration with credential
-  end
+  # First-run setup (WebAuthn registration for first admin)
+  resource :first_run, only: %i[ show create ]
+  post "first_run/options", to: "first_runs#options", as: :first_run_options
 
   # Session management (WebAuthn authentication)
   resource :session, only: %i[ new destroy ] do
