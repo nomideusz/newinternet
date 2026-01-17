@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- Circular network nodes representing interconnected people -->
+  <circle cx="24" cy="24" r="22" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.15"/>
+  
+  <!-- Central node -->
+  <circle cx="24" cy="24" r="4" fill="currentColor"/>
+  
+  <!-- Surrounding nodes - representing network connections -->
+  <circle cx="24" cy="10" r="2.5" fill="currentColor"/>
+  <circle cx="36" cy="17" r="2.5" fill="currentColor"/>
+  <circle cx="36" cy="31" r="2.5" fill="currentColor"/>
+  <circle cx="24" cy="38" r="2.5" fill="currentColor"/>
+  <circle cx="12" cy="31" r="2.5" fill="currentColor"/>
+  <circle cx="12" cy="17" r="2.5" fill="currentColor"/>
+  
+  <!-- Connection lines - representing relationships -->
+  <line x1="24" y1="20" x2="24" y2="12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="27" y1="21.5" x2="33.5" y2="18.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="27" y1="26.5" x2="33.5" y2="29.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="24" y1="28" x2="24" y2="35.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="21" y1="26.5" x2="14.5" y2="29.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="21" y1="21.5" x2="14.5" y2="18.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Cross-connections showing network effect -->
+  <line x1="24" y1="12.5" x2="33.5" y2="18.5" stroke="currentColor" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
+  <line x1="33.5" y1="18.5" x2="33.5" y2="29.5" stroke="currentColor" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
+  <line x1="33.5" y1="29.5" x2="24" y2="35.5" stroke="currentColor" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
+  <line x1="24" y1="35.5" x2="14.5" y2="29.5" stroke="currentColor" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
+  <line x1="14.5" y1="29.5" x2="14.5" y2="18.5" stroke="currentColor" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
+  <line x1="14.5" y1="18.5" x2="24" y2="12.5" stroke="currentColor" stroke-width="1" opacity="0.4" stroke-linecap="round"/>
+</svg>

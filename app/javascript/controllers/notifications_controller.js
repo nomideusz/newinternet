@@ -29,19 +29,30 @@ export default class extends Controller {
   }
 
   async attemptToSubscribe() {
-    if (this.#allowed) {
-      const registration = await this.#serviceWorkerRegistration || await this.#registerServiceWorker()
+    try {
+      if (this.#allowed) {
+        const registration = await this.#serviceWorkerRegistration || await this.#registerServiceWorker()
 
-      switch(Notification.permission) {
-        case "denied":  { this.#revealNotAllowedNotice(); break }
-        case "granted": { this.#subscribe(registration); break }
-        case "default": { this.#requestPermissionAndSubscribe(registration) }
+        if (!registration) {
+          console.error("Service worker registration failed")
+          this.#revealNotAllowedNotice()
+          return
+        }
+
+        switch(Notification.permission) {
+          case "denied":  { this.#revealNotAllowedNotice(); break }
+          case "granted": { this.#subscribe(registration); break }
+          case "default": { this.#requestPermissionAndSubscribe(registration) }
+        }
+      } else {
+        this.#revealNotAllowedNotice()
       }
-    } else {
+    } catch (error) {
+      console.error("Failed to subscribe to notifications:", error)
       this.#revealNotAllowedNotice()
+    } finally {
+      this.#endFirstRun()
     }
-
-    this.#endFirstRun()
   }
 
   async isEnabled() {

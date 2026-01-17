@@ -23,7 +23,7 @@ function base64urlToBuffer(base64url) {
 
 // WebAuthn controller for passkey registration and authentication
 export default class extends Controller {
-  static targets = ["username", "form", "error", "submit"];
+  static targets = ["username", "name", "form", "error", "submit"];
   static values = {
     mode: String, // "login" | "register" | "firstrun"
     optionsUrl: String,
@@ -122,7 +122,7 @@ export default class extends Controller {
 
   async register() {
     const username = this.usernameTarget.value.trim().toLowerCase();
-    const name = username; // Simplified: Use username as name
+    const name = this.hasNameTarget ? this.nameTarget.value.trim() : username;
 
     if (!username) {
       throw new Error("Please enter a username");

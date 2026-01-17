@@ -54,13 +54,21 @@ export default class extends Controller {
   }
 
   submitByKeyboard(event) {
-    const toolbarVisible = this.element.classList.contains(this.toolbarClass)
-    const metaEnter = event.key == "Enter" && (event.metaKey || event.ctrlKey)
-    const plainEnter = event.keyCode == 13 && !event.shiftKey && !event.isComposing
-
-    if (!this.#usingTouchDevice && (metaEnter || (plainEnter && !toolbarVisible))) {
-      this.submit(event)
+    // Shift+Enter creates new line (don't prevent default, don't submit)
+    if (event.shiftKey) {
+      // Allow the new line by not preventing or stopping the event
+      // Note: The :prevent in the action string only runs if we don't stop here
+      return
     }
+
+    // On touch devices, only submit on meta/ctrl+Enter
+    if (this.#usingTouchDevice && !event.metaKey && !event.ctrlKey) {
+      return
+    }
+
+    // Prevent default new line and submit
+    event.preventDefault()
+    this.submit(event)
   }
 
   filePicked(event) {
