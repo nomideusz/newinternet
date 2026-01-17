@@ -8,12 +8,16 @@ Rails.application.routes.draw do
 
   # Session management (WebAuthn authentication)
   resource :session, only: %i[ new destroy ] do
-    post :options, on: :collection, as: :options  # Generates options_session_path which maps to session_options_url helper? No, explicit 'as' is safer.
-    post :create, on: :collection, as: :create
+    # These collection routes inside 'resource' can cause naming confusion.
+    # explicit routes below handle options/create.
+    
     scope module: "sessions" do
       resources :transfers, only: %i[ show update ]
     end
   end
+  
+  post "session/options", to: "sessions#options", as: :session_options
+  post "session", to: "sessions#create", as: :session_create # session_path(method: :post) is standard but explicit create helper is fine too
 
   resource :account do
     scope module: "accounts" do
