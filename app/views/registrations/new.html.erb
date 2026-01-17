@@ -18,21 +18,7 @@
 
         <p class="txt-danger txt-align-center" data-webauthn-target="error" hidden></p>
 
-        <div class="flex align-center gap margin-block-start">
-          <%= translation_button(:user_name) %>
-          <label class="flex align-center gap flex-item-grow txt-large input input--actor">
-            <input type="text"
-                   name="name"
-                   class="input"
-                   autocomplete="name"
-                   placeholder="Your name"
-                   autofocus
-                   required
-                   data-webauthn-target="name"
-                   data-1p-ignore="true">
-            <%= image_tag "person.svg", aria: { hidden: "true" }, size: 24, class: "colorize--black" %>
-          </label>
-        </div>
+
 
         <div class="flex align-center gap margin-block-start">
           <%= translation_button(:username) %>

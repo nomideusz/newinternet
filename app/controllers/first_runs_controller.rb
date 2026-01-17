@@ -12,7 +12,7 @@ class FirstRunsController < ApplicationController
   # POST /first_run/options - Generate WebAuthn creation options for admin
   def options
     username = params[:username]&.downcase&.strip
-    name = params[:name]&.strip
+    name = params[:name]&.strip.presence || username
 
     if username.blank?
       render json: { error: "Username is required" }, status: :unprocessable_entity
