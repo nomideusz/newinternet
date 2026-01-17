@@ -8,8 +8,8 @@ Rails.application.routes.draw do
 
   # Session management (WebAuthn authentication)
   resource :session, only: %i[ new destroy ] do
-    post :options, on: :collection  # Generate WebAuthn assertion options
-    post :create, on: :collection   # Verify assertion and create session
+    post :options, on: :collection, as: :options  # Generates options_session_path which maps to session_options_url helper? No, explicit 'as' is safer.
+    post :create, on: :collection, as: :create
     scope module: "sessions" do
       resources :transfers, only: %i[ show update ]
     end
