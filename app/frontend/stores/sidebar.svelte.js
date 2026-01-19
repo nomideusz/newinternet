@@ -4,6 +4,7 @@ export class SidebarStore {
   directMemberships = $state([])
   otherMemberships = $state([])
   subscription = null
+  roomReadHandler = null
 
   constructor(initialDirects = [], initialOthers = []) {
     this.directMemberships = initialDirects
@@ -13,6 +14,25 @@ export class SidebarStore {
   init(directs, others) {
     this.directMemberships = directs
     this.otherMemberships = others
+    
+    // Listen for room-read events from chat
+    this.roomReadHandler = (e) => this.handleRoomRead(e.detail.roomId)
+    window.addEventListener('room-read', this.roomReadHandler)
+  }
+  
+  handleRoomRead(roomId) {
+    // Clear unread status for the room
+    let found = this.directMemberships.find(m => m.room.id === roomId || m.room_id === roomId)
+    if (found) {
+      found.unread = false
+      this.directMemberships = [...this.directMemberships]
+    }
+    
+    found = this.otherMemberships.find(m => m.room.id === roomId || m.room_id === roomId)
+    if (found) {
+      found.unread = false
+      this.otherMemberships = [...this.otherMemberships]
+    }
   }
 
   handleRoomCreated(membership) {
@@ -61,6 +81,10 @@ export class SidebarStore {
     if (this.subscription) {
       this.subscription.unsubscribe()
       this.subscription = null
+    }
+    if (this.roomReadHandler) {
+      window.removeEventListener('room-read', this.roomReadHandler)
+      this.roomReadHandler = null
     }
   }
 }

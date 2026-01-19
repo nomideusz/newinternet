@@ -81,22 +81,22 @@
     }
 
     // Optimistic UI: add message immediately
+    // Use div.trix-content to match server-rendered ActionText format
     if (store && currentUser) {
-      store.addOptimistic(clientMessageId, `<p>${escapeHtml(messageBody)}</p>`, currentUser);
+      store.addOptimistic(clientMessageId, `<div class="trix-content"><p>${escapeHtml(messageBody)}</p></div>`, currentUser);
     }
 
     // Clear input immediately for instant feedback
     const previousBody = body;
     body = "";
     
-    // Reset textarea height
-    await tick();
+    // Reset textarea height and keep focus BEFORE any async operations
+    // This is critical for mobile keyboard - must not lose focus
     if (textareaRef) {
       textareaRef.style.height = "auto";
+      // Immediate focus to keep keyboard open on mobile
+      textareaRef.focus();
     }
-
-    // Keep focus on input (critical for mobile keyboard)
-    refocusInput();
 
     try {
       const response = await fetch(`/rooms/${room.id}/messages`, {
@@ -140,16 +140,6 @@
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
-  }
-
-  // Refocus input to keep mobile keyboard open
-  function refocusInput() {
-    if (textareaRef) {
-      // Use setTimeout to ensure this happens after any other focus changes
-      setTimeout(() => {
-        textareaRef.focus();
-      }, 0);
-    }
   }
 
   function handleKeydown(event) {

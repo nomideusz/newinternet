@@ -1,4 +1,4 @@
-import { subscribeToRoom, subscribeToTyping } from "../cable/subscriptions"
+import { subscribeToRoom, subscribeToTyping, subscribeToPresence } from "../cable/subscriptions"
 
 export class MessagesStore {
   messages = $state([])
@@ -6,6 +6,7 @@ export class MessagesStore {
   typingUsers = $state([])
   subscription = null
   typingSubscription = null
+  presenceSubscription = null
   currentUserId = null
 
   constructor(initialMessages = [], currentUserId = null) {
@@ -116,8 +117,21 @@ export class MessagesStore {
       }
     })
 
+    // Subscribe to PresenceChannel to mark room as read
+    // This clears the unread indicator in sidebar
+    this.presenceSubscription = subscribeToPresence(roomId, {
+      onConnected: () => {
+        // Room is marked as read on the server when we connect
+        // Update local sidebar state
+        this.markRoomAsRead(roomId)
+      }
+    })
+
     this.typingSubscription = subscribeToTyping(roomId, {
       onData: (data) => {
+        // Filter out our own typing notifications
+        if (data.user && data.user.id === this.currentUserId) return
+        
         if (data.action === "start") {
           this.addTypingUser(data.user)
         } else if (data.action === "stop") {
@@ -127,10 +141,20 @@ export class MessagesStore {
     })
   }
 
+  // Notify sidebar to clear unread state
+  markRoomAsRead(roomId) {
+    // Dispatch a custom event that sidebar can listen to
+    window.dispatchEvent(new CustomEvent('room-read', { detail: { roomId } }))
+  }
+
   disconnect() {
     if (this.subscription) {
       this.subscription.unsubscribe()
       this.subscription = null
+    }
+    if (this.presenceSubscription) {
+      this.presenceSubscription.unsubscribe()
+      this.presenceSubscription = null
     }
     if (this.typingSubscription) {
       this.typingSubscription.unsubscribe()
