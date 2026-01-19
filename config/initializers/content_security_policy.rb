@@ -24,9 +24,8 @@ Rails.application.configure do
     # Allow blob: for test environment if needed
     policy.script_src *policy.script_src, :blob if Rails.env.test?
 
-    policy.style_src :self, :https
-    # Allow @vite/client to hot reload style changes in development
-    policy.style_src *policy.style_src, :unsafe_inline if Rails.env.development?
+    # Allow inline styles for Svelte components which use style: directives
+    policy.style_src :self, :https, :unsafe_inline
 
     # Specify URI for violation reports
     # policy.report_uri "/csp-violation-report-endpoint"
