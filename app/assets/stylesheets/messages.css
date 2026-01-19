@@ -139,6 +139,20 @@
     margin-block-start: calc((var(--message-space) + (var(--message-row-gap) * 2) - 2px) * -1);
   }
 
+  &.message--pending {
+    opacity: 0.7;
+    
+    .message__body-content {
+      position: relative;
+    }
+    
+    .message__timestamp::after {
+      content: " • Sending...";
+      font-size: 0.75em;
+      opacity: 0.7;
+    }
+  }
+
   &.message--failed {
     opacity: 0.5;
 
@@ -151,6 +165,12 @@
     .message__body-content {
       animation: wiggle 0.4s both;
       outline: 1px dashed var(--color-negative);
+    }
+    
+    .message__timestamp::after {
+      content: " • Failed to send";
+      color: var(--color-negative);
+      font-size: 0.75em;
     }
   }
 }

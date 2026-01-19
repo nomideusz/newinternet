@@ -1,35 +1,58 @@
 <script>
+  import { onMount, onDestroy, tick } from "svelte";
   import iconSearch from "images/search.svg";
   import iconMessagesOutlined from "images/messages-outlined.svg";
   import iconArrowUp from "images/arrow-up.svg";
 
-  let { room } = $props();
+  let { room, store = null, currentUser = null } = $props();
 
   let body = $state("");
   let isSubmitting = $state(false);
-  let isTyping = $state(false);
+  let textareaRef = $state(null);
   let typingTimeout = null;
+  let isCurrentlyTyping = $state(false);
 
-  // Reactive character counter - updates automatically when body changes
+  // Reactive character counter
   const MAX_CHARS = 2000;
   let charCount = $derived(body.length);
   let charsRemaining = $derived(MAX_CHARS - body.length);
   let isNearLimit = $derived(charsRemaining <= 100);
   let isOverLimit = $derived(charsRemaining < 0);
 
-  // Typing indicator - demonstrates reactive state with timers
+  // Generate unique client message ID
+  function generateClientId() {
+    return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+
+  // Typing indicators via store
   function handleInput() {
-    isTyping = true;
+    autoResize();
+    
+    if (store && !isCurrentlyTyping && body.trim()) {
+      isCurrentlyTyping = true;
+      store.startTyping();
+    }
 
     // Clear previous timeout
     if (typingTimeout) {
       clearTimeout(typingTimeout);
     }
 
-    // Reset typing state after 1 second of no input
+    // Stop typing indicator after 2 seconds of no input
     typingTimeout = setTimeout(() => {
-      isTyping = false;
-    }, 1000);
+      if (store && isCurrentlyTyping) {
+        isCurrentlyTyping = false;
+        store.stopTyping();
+      }
+    }, 2000);
+  }
+
+  // Auto-resize textarea to fit content
+  function autoResize() {
+    if (textareaRef) {
+      textareaRef.style.height = "auto";
+      textareaRef.style.height = Math.min(textareaRef.scrollHeight, 150) + "px";
+    }
   }
 
   // Get CSRF token from meta tag
@@ -39,16 +62,43 @@
   }
 
   async function handleSubmit(event) {
-    event.preventDefault();
-    event.stopPropagation();
+    event?.preventDefault();
+    event?.stopPropagation();
 
-    if (!body.trim()) return;
+    const messageBody = body.trim();
+    if (!messageBody || isSubmitting || isOverLimit) return;
 
+    const clientMessageId = generateClientId();
     isSubmitting = true;
 
+    // Stop typing indicator
+    if (store && isCurrentlyTyping) {
+      isCurrentlyTyping = false;
+      store.stopTyping();
+    }
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+    }
+
+    // Optimistic UI: add message immediately
+    if (store && currentUser) {
+      store.addOptimistic(clientMessageId, `<p>${escapeHtml(messageBody)}</p>`, currentUser);
+    }
+
+    // Clear input immediately for instant feedback
+    const previousBody = body;
+    body = "";
+    
+    // Reset textarea height
+    await tick();
+    if (textareaRef) {
+      textareaRef.style.height = "auto";
+    }
+
+    // Keep focus on input (critical for mobile keyboard)
+    refocusInput();
+
     try {
-      // Use fetch instead of Inertia router to avoid page navigation
-      // Messages are broadcast via ActionCable, so we don't need the response
       const response = await fetch(`/rooms/${room.id}/messages`, {
         method: "POST",
         headers: {
@@ -56,28 +106,92 @@
           "X-CSRF-Token": getCsrfToken(),
           Accept: "application/json",
         },
-        body: JSON.stringify({ message: { body } }),
+        body: JSON.stringify({ 
+          message: { 
+            body: messageBody,
+            client_message_id: clientMessageId 
+          } 
+        }),
       });
 
-      if (response.ok || response.status === 204 || response.status === 302) {
-        // Success - message will appear via ActionCable broadcast
-        body = "";
-      } else {
+      if (!response.ok && response.status !== 204 && response.status !== 302) {
+        // Mark as failed
+        if (store) {
+          store.markFailed(clientMessageId);
+        }
+        // Restore the message for retry
+        body = previousBody;
         console.error("Failed to send message:", response.status);
       }
     } catch (error) {
+      // Mark as failed
+      if (store) {
+        store.markFailed(clientMessageId);
+      }
+      // Restore the message for retry
+      body = previousBody;
       console.error("Error sending message:", error);
     } finally {
       isSubmitting = false;
     }
   }
 
-  function handleKeydown(event) {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      handleSubmit(event);
+  function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Refocus input to keep mobile keyboard open
+  function refocusInput() {
+    if (textareaRef) {
+      // Use setTimeout to ensure this happens after any other focus changes
+      setTimeout(() => {
+        textareaRef.focus();
+      }, 0);
     }
   }
+
+  function handleKeydown(event) {
+    // On mobile (touch devices), only submit with send button
+    // On desktop, Enter submits, Shift+Enter creates new line
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    if (event.key === "Enter") {
+      if (event.shiftKey) {
+        // Shift+Enter: allow new line
+        return;
+      }
+      
+      if (isTouchDevice) {
+        // On mobile, Enter key from keyboard accessory should send
+        // (enterkeyhint="send" handles this)
+        event.preventDefault();
+        handleSubmit(event);
+      } else {
+        // Desktop: Enter sends, Shift+Enter for new line
+        event.preventDefault();
+        handleSubmit(event);
+      }
+    }
+  }
+
+  // Focus input on mount (desktop only)
+  onMount(() => {
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (!isTouchDevice && textareaRef) {
+      textareaRef.focus();
+    }
+  });
+
+  onDestroy(() => {
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+    }
+    if (store && isCurrentlyTyping) {
+      store.stopTyping();
+    }
+  });
 </script>
 
 <div class="composer flex align-end gap position-relative">
@@ -108,24 +222,21 @@
 
             <div class="flex flex-column flex-item-grow min-width gap full-width">
               <textarea
+                bind:this={textareaRef}
                 bind:value={body}
                 onkeydown={handleKeydown}
                 oninput={handleInput}
                 rows="1"
                 class="input full-width"
-                style="width: 100%; resize: none;"
+                style="width: 100%; resize: none; max-height: 150px; overflow-y: auto;"
                 aria-label="Write a message"
                 placeholder="Write a message..."
+                enterkeyhint="send"
+                inputmode="text"
+                autocomplete="off"
+                autocorrect="on"
+                spellcheck="true"
               ></textarea>
-
-              {#if isTyping}
-                <span
-                  class="composer__typing-indicator txt-small"
-                  style="position: absolute; left: 3rem; bottom: 0.5rem; opacity: 0.6; color: var(--color-selected-dark);"
-                >
-                  ✍️ typing...
-                </span>
-              {/if}
 
               {#if charCount > 0}
                 <span

@@ -3,6 +3,7 @@
   import RoomNav from "../../components/RoomNav.svelte";
   import MessageList from "../../components/MessageList.svelte";
   import Composer from "../../components/Composer.svelte";
+  import TypingIndicator from "../../components/TypingIndicator.svelte";
   import { MessagesStore } from "../../stores/messages.svelte.js";
 
   let {
@@ -15,7 +16,7 @@
     sidebar = {},
   } = $props();
 
-  // Initialize store - will be populated via $effect
+  // Initialize store (currentUserId will be set in effect)
   const store = new MessagesStore();
 
   // Track mounted nav instance (sidebar is handled by global manager)
@@ -23,7 +24,8 @@
 
   // Connect store to room
   $effect(() => {
-    store.init(messages);
+    store.init(messages, currentUser?.id);
+    store.currentUserId = currentUser?.id;
     store.connect(room.id);
     return () => store.disconnect();
   });
@@ -74,7 +76,7 @@
 
 <div id="message-area" class="message-area">
   <MessageList
-    messages={store.messages}
+    messages={store.allMessages}
     {anchorMessageId}
     currentUserId={currentUser?.id}
     bind:scrollRef={messageAreaRef}
@@ -92,4 +94,7 @@
   {/if}
 </div>
 
-<Composer {room} />
+<div class="composer-wrapper">
+  <TypingIndicator users={store.typingUsers} />
+  <Composer {room} {store} {currentUser} />
+</div>

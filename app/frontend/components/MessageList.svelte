@@ -1,5 +1,5 @@
 <script>
-  import { onMount, tick } from "svelte";
+  import { onMount, tick, untrack } from "svelte";
   import Message from "./Message.svelte";
 
   let {
@@ -11,6 +11,8 @@
   } = $props();
 
   let previousMessageCount = $state(0);
+  let isNearBottom = $state(true);
+  let initialScrollDone = $state(false);
 
   function isSameDay(date1, date2) {
     const d1 = new Date(date1);
@@ -24,10 +26,25 @@
     return !isSameDay(message.created_at, prevMessage.created_at);
   }
 
-  function scrollToBottom() {
+  function scrollToBottom(behavior = "instant") {
     if (scrollRef) {
-      scrollRef.scrollTop = scrollRef.scrollHeight;
+      scrollRef.scrollTo({
+        top: scrollRef.scrollHeight,
+        behavior: behavior
+      });
     }
+  }
+
+  function checkIfNearBottom() {
+    if (scrollRef) {
+      const threshold = 150; // pixels from bottom
+      isNearBottom = scrollRef.scrollHeight - scrollRef.scrollTop - scrollRef.clientHeight < threshold;
+    }
+  }
+
+  function handleScrollInternal(event) {
+    checkIfNearBottom();
+    if (onscroll) onscroll(event);
   }
 
   // Scroll to anchor message if specified, otherwise scroll to bottom on mount
@@ -38,25 +55,37 @@
       const element = document.getElementById(`message_${anchorMessageId}`);
       if (element) {
         element.scrollIntoView({ behavior: "instant", block: "center" });
+        element.classList.add("search-highlight");
       }
     } else {
-      scrollToBottom();
+      scrollToBottom("instant");
     }
 
     previousMessageCount = messages.length;
+    initialScrollDone = true;
+    checkIfNearBottom();
   });
 
-  // Scroll to bottom when new messages arrive
+  // Auto-scroll when new messages arrive (if user was near bottom)
   $effect(() => {
     const currentCount = messages.length;
-
-    if (currentCount > previousMessageCount && previousMessageCount > 0) {
-      // New message arrived - scroll to bottom after DOM updates
+    
+    // Use untrack to read state without creating dependency
+    const wasNearBottom = untrack(() => isNearBottom);
+    const prevCount = untrack(() => previousMessageCount);
+    const scrollDone = untrack(() => initialScrollDone);
+    
+    if (scrollDone && currentCount > prevCount) {
+      // New message(s) arrived
       tick().then(() => {
-        scrollToBottom();
+        if (wasNearBottom) {
+          // User was near bottom, auto-scroll to show new message
+          scrollToBottom("smooth");
+        }
+        checkIfNearBottom();
       });
     }
-
+    
     previousMessageCount = currentCount;
   });
 </script>
@@ -66,9 +95,9 @@
   role="log"
   aria-live="polite"
   bind:this={scrollRef}
-  {onscroll}
+  onscroll={handleScrollInternal}
 >
-  {#each messages as message, index (message.id)}
+  {#each messages as message, index (message.client_message_id || message.id)}
     <Message
       {message}
       showDaySeparator={shouldShowDaySeparator(message, index)}

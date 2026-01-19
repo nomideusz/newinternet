@@ -14,6 +14,18 @@ export function subscribeToRoom(roomId, callbacks = {}) {
   )
 }
 
+export function subscribeToTyping(roomId, callbacks = {}) {
+  return consumer.subscriptions.create(
+    { channel: "TypingNotificationsChannel", room_id: roomId },
+    {
+      received(data) {
+        if (callbacks.onData) callbacks.onData(data)
+      },
+      ...callbacks
+    }
+  )
+}
+
 export function subscribeToUser(userId, callbacks = {}) {
   return consumer.subscriptions.create(
     { channel: "UserChannel", user_id: userId },

@@ -1,27 +1,102 @@
-import { subscribeToRoom } from "../cable/subscriptions"
+import { subscribeToRoom, subscribeToTyping } from "../cable/subscriptions"
 
 export class MessagesStore {
   messages = $state([])
+  pendingMessages = $state([])
+  typingUsers = $state([])
   subscription = null
+  typingSubscription = null
+  currentUserId = null
 
-  constructor(initialMessages = []) {
+  constructor(initialMessages = [], currentUserId = null) {
     this.messages = initialMessages
+    this.currentUserId = currentUserId
   }
   
-  init(messages) {
+  init(messages, currentUserId = null) {
     this.messages = [...messages]
+    this.currentUserId = currentUserId
+  }
+
+  // Get all messages including pending ones for display
+  get allMessages() {
+    // Combine real messages with pending messages
+    // Filter out pending messages that have been confirmed (by client_message_id)
+    const confirmedClientIds = new Set(
+      this.messages
+        .filter(m => m.client_message_id)
+        .map(m => m.client_message_id)
+    )
+    
+    const stillPending = this.pendingMessages.filter(
+      pm => !confirmedClientIds.has(pm.client_message_id)
+    )
+    
+    return [...this.messages, ...stillPending]
+  }
+
+  // Add optimistic message before server confirms
+  addOptimistic(clientMessageId, body, creator) {
+    const pendingMessage = {
+      id: `pending_${clientMessageId}`,
+      client_message_id: clientMessageId,
+      body: body,
+      plain_text_body: body.replace(/<[^>]*>/g, ''),
+      created_at: new Date().toISOString(),
+      creator_id: creator.id,
+      creator: creator,
+      pending: true,
+      failed: false,
+    }
+    
+    this.pendingMessages = [...this.pendingMessages, pendingMessage]
+    return pendingMessage
+  }
+
+  // Mark pending message as failed
+  markFailed(clientMessageId) {
+    this.pendingMessages = this.pendingMessages.map(pm => 
+      pm.client_message_id === clientMessageId 
+        ? { ...pm, failed: true, pending: false }
+        : pm
+    )
+  }
+
+  // Remove a pending message (e.g., after retry or cancel)
+  removePending(clientMessageId) {
+    this.pendingMessages = this.pendingMessages.filter(
+      pm => pm.client_message_id !== clientMessageId
+    )
   }
 
   add(message) {
-    // Basic deduplication
+    // Check if this confirms a pending message
+    if (message.client_message_id) {
+      this.pendingMessages = this.pendingMessages.filter(
+        pm => pm.client_message_id !== message.client_message_id
+      )
+    }
+    
+    // Basic deduplication by ID
     if (!this.messages.find(m => m.id === message.id)) {
-      // Append and ensure sorted by created_at (assuming new messages are always newer)
-      this.messages.push(message)
+      this.messages = [...this.messages, message]
     }
   }
 
   remove(id) {
     this.messages = this.messages.filter(m => m.id !== id)
+  }
+
+  // Typing indicators
+  addTypingUser(user) {
+    if (user.id === this.currentUserId) return // Don't show self
+    if (!this.typingUsers.find(u => u.id === user.id)) {
+      this.typingUsers = [...this.typingUsers, user]
+    }
+  }
+
+  removeTypingUser(userId) {
+    this.typingUsers = this.typingUsers.filter(u => u.id !== userId)
   }
 
   connect(roomId) {
@@ -31,8 +106,22 @@ export class MessagesStore {
       onData: (data) => {
         if (data.type === "message.created") {
           this.add(data.message)
+          // Remove from typing when they send a message
+          if (data.message.creator_id) {
+            this.removeTypingUser(data.message.creator_id)
+          }
         } else if (data.type === "message.removed") {
           this.remove(data.id)
+        }
+      }
+    })
+
+    this.typingSubscription = subscribeToTyping(roomId, {
+      onData: (data) => {
+        if (data.action === "start") {
+          this.addTypingUser(data.user)
+        } else if (data.action === "stop") {
+          this.removeTypingUser(data.user.id)
         }
       }
     })
@@ -42,6 +131,24 @@ export class MessagesStore {
     if (this.subscription) {
       this.subscription.unsubscribe()
       this.subscription = null
+    }
+    if (this.typingSubscription) {
+      this.typingSubscription.unsubscribe()
+      this.typingSubscription = null
+    }
+    this.typingUsers = []
+  }
+
+  // Send typing notification
+  startTyping() {
+    if (this.typingSubscription) {
+      this.typingSubscription.perform("start", {})
+    }
+  }
+
+  stopTyping() {
+    if (this.typingSubscription) {
+      this.typingSubscription.perform("stop", {})
     }
   }
 }

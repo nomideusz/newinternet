@@ -40,6 +40,9 @@
   }
 
   async function addReaction(emoji, detailsEl) {
+    // Don't allow reactions on pending messages
+    if (message.pending) return;
+    
     // Close the menu
     if (detailsEl) {
       detailsEl.removeAttribute("open");
@@ -60,6 +63,9 @@
   }
 
   function copyLink(detailsEl) {
+    // Don't allow link copy on pending messages
+    if (message.pending) return;
+    
     if (detailsEl) {
       detailsEl.removeAttribute("open");
     }
@@ -70,6 +76,9 @@
   }
 
   function handleReply(detailsEl) {
+    // Don't allow reply to pending messages
+    if (message.pending) return;
+    
     if (detailsEl) {
       detailsEl.removeAttribute("open");
     }
@@ -88,6 +97,8 @@
   }
 
   let isCurrentUser = $derived(message.creator_id === currentUserId);
+  let isPending = $derived(message.pending === true);
+  let isFailed = $derived(message.failed === true);
   let detailsRef = $state(null);
 </script>
 
@@ -97,6 +108,8 @@
   class="message message--formatted"
   class:message--me={isCurrentUser}
   class:message--first-of-day={showDaySeparator}
+  class:message--pending={isPending}
+  class:message--failed={isFailed}
   id="message_{message.id}"
 >
   {#if showDaySeparator}
