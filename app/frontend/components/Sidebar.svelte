@@ -1,6 +1,6 @@
 <script>
     import { router } from "@inertiajs/svelte";
-    import { onMount, onDestroy } from "svelte";
+    import { onMount, onDestroy, untrack } from "svelte";
     import DirectRoomItem from "./DirectRoomItem.svelte";
     import SharedRoomItem from "./SharedRoomItem.svelte";
     import DirectPlaceholder from "./DirectPlaceholder.svelte";
@@ -24,8 +24,13 @@
     let connectedUserId = null;
 
     // Update store data when props change (don't reconnect)
+    // Use untrack for store mutations to prevent effect loops
     $effect(() => {
-        store.init(directMemberships, otherMemberships);
+        const directs = directMemberships;
+        const others = otherMemberships;
+        untrack(() => {
+            store.init(directs, others);
+        });
     });
 
     // Connect on mount

@@ -24,9 +24,14 @@
   let connectedRoomId = null;
 
   // Update messages when props change (without reconnecting)
+  // Use untrack for store mutations to prevent effect loops
   $effect(() => {
-    store.init(messages, currentUser?.id);
-    store.currentUserId = currentUser?.id;
+    const msgs = messages;
+    const userId = currentUser?.id;
+    untrack(() => {
+      store.init(msgs, userId);
+      store.currentUserId = userId;
+    });
   });
 
   // Connect only when room changes - use onMount for initial connection
