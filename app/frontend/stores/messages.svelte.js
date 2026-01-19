@@ -152,15 +152,27 @@ export class MessagesStore {
 
   disconnect() {
     if (this.subscription) {
-      this.subscription.unsubscribe()
+      try {
+        this.subscription.unsubscribe()
+      } catch (e) {
+        // Subscription may already be unsubscribed or never connected
+      }
       this.subscription = null
     }
     if (this.presenceSubscription) {
-      this.presenceSubscription.unsubscribe()
+      try {
+        this.presenceSubscription.unsubscribe()
+      } catch (e) {
+        // Subscription may already be unsubscribed or never connected
+      }
       this.presenceSubscription = null
     }
     if (this.typingSubscription) {
-      this.typingSubscription.unsubscribe()
+      try {
+        this.typingSubscription.unsubscribe()
+      } catch (e) {
+        // Subscription may already be unsubscribed or never connected
+      }
       this.typingSubscription = null
     }
     this.typingUsers = []

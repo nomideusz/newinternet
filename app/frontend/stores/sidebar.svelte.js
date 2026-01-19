@@ -88,7 +88,11 @@ export class SidebarStore {
 
   disconnect() {
     if (this.subscription) {
-      this.subscription.unsubscribe()
+      try {
+        this.subscription.unsubscribe()
+      } catch (e) {
+        // Subscription may already be unsubscribed or never connected
+      }
       this.subscription = null
     }
     if (this.roomReadHandler) {
