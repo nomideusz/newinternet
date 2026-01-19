@@ -29,19 +29,32 @@
         return () => store.disconnect();
     });
 
+    function closeSidebarOnMobile() {
+        if (window.innerWidth <= 100 * parseFloat(getComputedStyle(document.documentElement).fontSize.replace('px', '')) / 16 * 16) {
+            const sidebar = document.getElementById("sidebar");
+            if (sidebar) {
+                sidebar.classList.remove("open");
+            }
+        }
+    }
+
     function navigateToNewDirect() {
+        closeSidebarOnMobile();
         router.visit("/rooms/directs/new");
     }
 
     function navigateToNewRoom() {
+        closeSidebarOnMobile();
         router.visit("/rooms/opens/new");
     }
 
     function navigateToProfile() {
+        closeSidebarOnMobile();
         router.visit("/users/me/profile");
     }
 
     function navigateToSettings() {
+        closeSidebarOnMobile();
         router.visit("/account/edit");
     }
 
@@ -66,7 +79,7 @@
 
 <div class="sidebar__container overflow-y overflow-hide-scrollbar">
     <div id="direct_rooms_control">
-        <div class="directs gap overflow-x overflow-hide-scrollbar">
+        <div class="directs flex gap overflow-x overflow-hide-scrollbar">
             <a
                 href="/rooms/directs/new"
                 class="direct direct__new"

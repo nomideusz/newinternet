@@ -450,6 +450,23 @@
   .user-filter-menu {
     display: flex;
     flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .user-filter-menu > li {
+    list-style: none;
+  }
+
+  .user-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .user-list > li {
+    list-style: none;
   }
 
   .selection-controls {
@@ -458,13 +475,6 @@
 
   .form-actions {
     margin-top: var(--block-space);
-  }
-
-  /* btn--danger uses existing .btn from app CSS */
-  .btn--danger {
-    --btn-background: var(--color-negative);
-    --btn-color: white;
-    --btn-border-color: var(--color-negative);
   }
 
   .icon--small {

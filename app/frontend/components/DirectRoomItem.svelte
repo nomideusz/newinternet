@@ -23,7 +23,18 @@
     return `/rooms/${membership.room_id}`
   }
 
+  function closeSidebarOnMobile() {
+    // Close sidebar on screens under 100ch
+    if (window.matchMedia('(max-width: 100ch)').matches) {
+      const sidebar = document.getElementById("sidebar")
+      if (sidebar) {
+        sidebar.classList.remove("open")
+      }
+    }
+  }
+
   function handleClick() {
+    closeSidebarOnMobile()
     router.visit(roomPath())
   }
 </script>
