@@ -11,6 +11,7 @@ console.log("[Inertia] Initializing Inertia app...");
 const pagesWithSidebar = [
   "Rooms/Show",
   "Rooms/Directs/New",
+  "Rooms/Directs/Edit",
   "Rooms/Opens/New",
   "Rooms/Opens/Edit",
   "Users/Sidebars/Show",

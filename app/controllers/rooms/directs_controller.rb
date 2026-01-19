@@ -1,5 +1,5 @@
 class Rooms::DirectsController < RoomsController
-  layout "inertia", only: :new
+  layout "inertia", only: %i[new edit]
 
   before_action :set_room, only: %i[ edit destroy ]
 
@@ -28,6 +28,22 @@ class Rooms::DirectsController < RoomsController
   end
 
   def edit
+    load_sidebar_data
+    users = @room.users.many? ? @room.users.without(Current.user) : @room.users
+
+    render inertia: "Rooms/Directs/Edit", props: {
+      page: { title: "Edit settings for #{helpers.room_display_name(@room)}", bodyClass: "sidebar" },
+      room: RoomPresenter.new(@room, current_user: Current.user).as_json,
+      otherUsers: UserPresenter.collection(users, view: :minimal),
+      cancelUrl: room_path(@room),
+      currentUser: UserPresenter.new(Current.user, view: :minimal).as_json,
+      sidebar: {
+        directMemberships: MembershipPresenter.collection(@direct_memberships, view: :sidebar),
+        otherMemberships: MembershipPresenter.collection(@other_memberships, view: :sidebar),
+        directPlaceholderUsers: UserPresenter.collection(@direct_placeholder_users, view: :minimal),
+        canCreateRooms: Current.user.administrator? || !Current.account.settings.restrict_room_creation_to_administrators?
+      }
+    }
   end
 
   private

@@ -1,7 +1,15 @@
 class Users::PushSubscriptionsController < ApplicationController
+  layout "inertia", only: :index
+
   before_action :set_push_subscriptions
 
   def index
+    render inertia: "Users/PushSubscriptions/Index", props: {
+      page: { title: "Push notification subscriptions" },
+      pushSubscriptions: @push_subscriptions.map { |sub| push_subscription_json(sub) },
+      cancelUrl: last_room_visited ? room_path(last_room_visited) : root_path,
+      currentUser: UserPresenter.new(Current.user, view: :minimal).as_json
+    }
   end
 
   def create
@@ -26,5 +34,16 @@ class Users::PushSubscriptionsController < ApplicationController
 
     def push_subscription_params
       params.require(:push_subscription).permit(:endpoint, :p256dh_key, :auth_key)
+    end
+
+    def push_subscription_json(subscription)
+      agent = UserAgent.parse(subscription.user_agent)
+      {
+        id: subscription.id,
+        endpoint: subscription.endpoint,
+        browser: agent.browser,
+        version: agent.version.to_s,
+        platform: agent.platform
+      }
     end
 end
