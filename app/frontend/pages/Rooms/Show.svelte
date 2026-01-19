@@ -21,13 +21,24 @@
 
   // Track mounted nav instance (sidebar is handled by global manager)
   let navInstance = null;
+  let connectedRoomId = null;
 
-  // Connect store to room
+  // Update messages when props change (without reconnecting)
   $effect(() => {
     store.init(messages, currentUser?.id);
     store.currentUserId = currentUser?.id;
-    store.connect(room.id);
-    return () => store.disconnect();
+  });
+
+  // Connect only when room changes
+  $effect(() => {
+    if (room && room.id !== connectedRoomId) {
+      connectedRoomId = room.id;
+      store.connect(room.id);
+    }
+    return () => {
+      store.disconnect();
+      connectedRoomId = null;
+    };
   });
 
   onMount(() => {

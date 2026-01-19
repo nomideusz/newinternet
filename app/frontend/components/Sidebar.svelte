@@ -18,15 +18,26 @@
         currentUser,
     } = $props();
 
-    // Initialize store - will be populated via $effect
+    // Initialize store once
     const store = new SidebarStore();
+    let connectedUserId = null;
 
+    // Update store data when props change (don't reconnect)
     $effect(() => {
         store.init(directMemberships, otherMemberships);
-        if (currentUser) {
+    });
+
+    // Connect only once when currentUser is available, and only reconnect if user changes
+    $effect(() => {
+        if (currentUser && currentUser.id !== connectedUserId) {
+            connectedUserId = currentUser.id;
             store.connect(currentUser.id);
         }
-        return () => store.disconnect();
+        return () => {
+            // Only disconnect when component is destroyed
+            store.disconnect();
+            connectedUserId = null;
+        };
     });
 
     function closeSidebarOnMobile() {
