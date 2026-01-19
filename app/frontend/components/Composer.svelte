@@ -91,21 +91,14 @@
     // Clear input immediately for instant feedback
     const previousBody = body;
     body = "";
+    isSubmitting = true;
     
-    // Reset textarea height
+    // Reset textarea height and keep focus
     if (textarea) {
       textarea.style.height = "auto";
+      // Keep focus on input to prevent keyboard from closing on mobile
+      textarea.focus();
     }
-    
-    // Use requestAnimationFrame to ensure focus happens after DOM updates
-    // This is critical for keeping mobile keyboard open
-    requestAnimationFrame(() => {
-      if (textarea) {
-        textarea.focus();
-      }
-    });
-    
-    isSubmitting = true;
 
     try {
       const response = await fetch(`/rooms/${room.id}/messages`, {
@@ -142,6 +135,13 @@
       console.error("Error sending message:", error);
     } finally {
       isSubmitting = false;
+      // Re-focus textarea after submission completes
+      // Use setTimeout to ensure DOM has updated after isSubmitting change
+      setTimeout(() => {
+        if (textarea) {
+          textarea.focus();
+        }
+      }, 0);
     }
   }
 
@@ -203,7 +203,7 @@
   </a>
 
   <form onsubmit={handleSubmit} class="flex flex-item-grow">
-    <fieldset class="full-width" disabled={isSubmitting} style="max-inline-size: 100%;">
+    <fieldset class="full-width" style="max-inline-size: 100%;">
       <div class="flex flex-column">
         <div
           class="flex composer__input input input--actor fill-white min-width"
