@@ -10,7 +10,7 @@
     scrollRef = $bindable(),
   } = $props();
 
-  // Use regular variables (not $state) for tracking to avoid effect loops
+  // Use regular variables for tracking
   let previousMessageCount = 0;
   let isNearBottom = true;
   let initialScrollDone = false;
@@ -48,6 +48,21 @@
     if (onscroll) onscroll(event);
   }
 
+  // Check for new messages and auto-scroll - called manually, not in an effect
+  function checkForNewMessages() {
+    const currentCount = messages.length;
+    if (initialScrollDone && currentCount > previousMessageCount) {
+      const wasNearBottom = isNearBottom;
+      tick().then(() => {
+        if (wasNearBottom) {
+          scrollToBottom("smooth");
+        }
+        checkIfNearBottom();
+      });
+    }
+    previousMessageCount = currentCount;
+  }
+
   // Scroll to anchor message if specified, otherwise scroll to bottom on mount
   onMount(async () => {
     await tick();
@@ -66,24 +81,29 @@
     initialScrollDone = true;
     checkIfNearBottom();
   });
-
-  // Auto-scroll when new messages arrive (if user was near bottom)
-  $effect(() => {
-    const currentCount = messages.length;
-    
-    if (initialScrollDone && currentCount > previousMessageCount) {
-      // New message(s) arrived
+  
+  // Use $derived to track message count changes without causing effect loops
+  // This creates a reactive binding that we can use to trigger side effects
+  let messageCount = $derived(messages.length);
+  
+  // Use $effect.pre to react to message count changes before render
+  $effect.pre(() => {
+    // Access messageCount to create the dependency
+    const count = messageCount;
+    // Schedule the scroll check after the current batch
+    if (initialScrollDone && count > previousMessageCount) {
       const wasNearBottom = isNearBottom;
-      tick().then(() => {
-        if (wasNearBottom) {
-          // User was near bottom, auto-scroll to show new message
-          scrollToBottom("smooth");
-        }
-        checkIfNearBottom();
+      // Use queueMicrotask to run after the effect but before paint
+      queueMicrotask(() => {
+        tick().then(() => {
+          if (wasNearBottom) {
+            scrollToBottom("smooth");
+          }
+          checkIfNearBottom();
+        });
       });
     }
-    
-    previousMessageCount = currentCount;
+    previousMessageCount = count;
   });
 </script>
 
