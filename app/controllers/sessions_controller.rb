@@ -3,10 +3,21 @@ class SessionsController < ApplicationController
   allow_unauthenticated_access only: %i[ new options create ]
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { render json: { error: "Too many requests" }, status: :too_many_requests }
 
+  layout "inertia", only: :new
+
   before_action :ensure_user_exists, only: :new
 
   # GET /session/new - Show login form
   def new
+    help_contact = User.administrator.first
+    render inertia: "Sessions/New", props: {
+      accountName: Current.account.name,
+      logoUrl: fresh_account_logo_path,
+      optionsUrl: session_options_path,
+      callbackUrl: session_path,
+      helpContact: help_contact ? { name: help_contact.name, email: help_contact.email_address } : nil,
+      version: Rails.application.config.app_version
+    }
   end
 
   # POST /session/options - Generate WebAuthn assertion options for login
