@@ -148,9 +148,9 @@
   <title>Sign in</title>
 </svelte:head>
 
-<section class="login-section txt-align-center">
-  <div class="panel {shake ? 'shake' : ''}">
-    <figure class="account-logo avatar center margin-block-end txt-xx-large">
+<section class="signup txt-align-center">
+  <div class="panel" class:shake>
+    <figure class="avatar center margin-block-end txt-xx-large">
       <img src={logoUrl} alt="Account logo" />
     </figure>
 
@@ -208,24 +208,15 @@
 </section>
 
 <style>
-  /* Login-specific layout - leverages app CSS utilities */
-  .login-section {
+  /* Login-specific overrides - minimal, using app CSS */
+  .signup {
+    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    min-height: 100dvh;
-    padding: 2rem;
-  }
-
-  .panel {
-    background: var(--color-surface, #fff);
-    border-radius: 1rem;
-    padding: 2rem;
-    max-width: 24rem;
-    width: 100%;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    padding: var(--block-space);
   }
 
   .panel.shake {
@@ -236,19 +227,6 @@
     0%, 100% { transform: translateX(0); }
     10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
     20%, 40%, 60%, 80% { transform: translateX(5px); }
-  }
-
-  .account-logo {
-    width: 6rem;
-    height: 6rem;
-    border-radius: 50%;
-    overflow: hidden;
-  }
-
-  .account-logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
 
   fieldset {

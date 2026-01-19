@@ -137,9 +137,9 @@
   <title>Set up New Internet</title>
 </svelte:head>
 
-<div class="center max-width">
+<div class="signup center max-width">
   <section class="nametag u-relative">
-    <div class="flex justify-center align-center pad-block">
+    <div class="flex justify-center align-center pad-block lanyard-bg">
       <img src={iconLanyard} class="nametag__lanyard" aria-hidden="true" alt="" />
     </div>
 
@@ -191,36 +191,24 @@
 </div>
 
 <style>
-  /* First-run setup specific layout - leverages app CSS utilities */
-  .center {
+  /* First-run setup - minimal overrides, using app's signup.css */
+  .signup.center {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
     min-height: 100dvh;
+    padding: var(--block-space);
   }
 
-  .max-width {
-    max-width: 28rem;
+  .signup.max-width {
+    max-width: 100%;
     width: 100%;
-    padding: 1rem;
   }
 
-  .nametag {
-    background: var(--color-surface, #fff);
-    border-radius: 1rem;
-    overflow: hidden;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-  }
-
-  .nametag__lanyard {
-    width: 100%;
-    max-width: 200px;
-  }
-
-  .nametag__inner {
-    padding: 1.5rem 2rem 2rem;
+  .lanyard-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
 
   fieldset {
@@ -243,10 +231,5 @@
     border: none;
     background: transparent;
     outline: none;
-  }
-
-  .pad-block {
-    padding-block: 1rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
 </style>
