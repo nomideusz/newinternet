@@ -79,7 +79,7 @@
 
 <div class="sidebar__container overflow-y overflow-hide-scrollbar">
     <div id="direct_rooms_control">
-        <div class="directs flex gap overflow-x overflow-hide-scrollbar">
+        <div class="directs gap overflow-x overflow-hide-scrollbar">
             <a
                 href="/rooms/directs/new"
                 class="direct direct__new"
@@ -107,22 +107,18 @@
                 </span>
             </a>
 
-            <div id="direct_rooms">
-                {#each store.directMemberships as membership (membership.id)}
-                    <DirectRoomItem {membership} {currentUser} />
-                {/each}
-            </div>
+            {#each store.directMemberships as membership (membership.id)}
+                <DirectRoomItem {membership} {currentUser} />
+            {/each}
 
-            <div>
-                {#each directPlaceholderUsers as user (user.id)}
-                    <DirectPlaceholder {user} />
-                {/each}
-            </div>
+            {#each directPlaceholderUsers as user (user.id)}
+                <DirectPlaceholder {user} />
+            {/each}
         </div>
     </div>
 
     <div class="rooms position-relative flex flex-column gap">
-        <div id="shared_rooms">
+        <div id="shared_rooms" class="flex flex-column gap">
             {#each store.otherMemberships as membership (membership.id)}
                 <SharedRoomItem {membership} />
             {/each}
