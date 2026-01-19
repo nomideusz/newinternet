@@ -142,14 +142,12 @@
   &.message--pending {
     opacity: 0.7;
     
-    .message__body-content {
-      position: relative;
-    }
-    
-    .message__timestamp::after {
-      content: " • Sending...";
+    .message__body-content::after {
+      content: "Sending...";
+      display: block;
       font-size: 0.75em;
-      opacity: 0.7;
+      opacity: 0.6;
+      margin-block-start: 0.25em;
     }
   }
 
@@ -167,10 +165,12 @@
       outline: 1px dashed var(--color-negative);
     }
     
-    .message__timestamp::after {
-      content: " • Failed to send";
+    .message__body-content::after {
+      content: "Failed to send";
+      display: block;
       color: var(--color-negative);
       font-size: 0.75em;
+      margin-block-start: 0.25em;
     }
   }
 }

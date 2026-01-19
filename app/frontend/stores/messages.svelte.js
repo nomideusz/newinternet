@@ -132,9 +132,12 @@ export class MessagesStore {
         // Filter out our own typing notifications
         if (data.user && data.user.id === this.currentUserId) return
         
-        if (data.action === "start") {
+        // Ruby symbols come as strings in JSON
+        const action = String(data.action)
+        
+        if (action === "start") {
           this.addTypingUser(data.user)
-        } else if (data.action === "stop") {
+        } else if (action === "stop") {
           this.removeTypingUser(data.user.id)
         }
       }

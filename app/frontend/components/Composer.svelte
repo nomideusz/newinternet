@@ -69,7 +69,9 @@
     if (!messageBody || isSubmitting || isOverLimit) return;
 
     const clientMessageId = generateClientId();
-    isSubmitting = true;
+    
+    // Store textarea reference before any state changes
+    const textarea = textareaRef;
 
     // Stop typing indicator
     if (store && isCurrentlyTyping) {
@@ -90,13 +92,20 @@
     const previousBody = body;
     body = "";
     
-    // Reset textarea height and keep focus BEFORE any async operations
-    // This is critical for mobile keyboard - must not lose focus
-    if (textareaRef) {
-      textareaRef.style.height = "auto";
-      // Immediate focus to keep keyboard open on mobile
-      textareaRef.focus();
+    // Reset textarea height
+    if (textarea) {
+      textarea.style.height = "auto";
     }
+    
+    // Use requestAnimationFrame to ensure focus happens after DOM updates
+    // This is critical for keeping mobile keyboard open
+    requestAnimationFrame(() => {
+      if (textarea) {
+        textarea.focus();
+      }
+    });
+    
+    isSubmitting = true;
 
     try {
       const response = await fetch(`/rooms/${room.id}/messages`, {

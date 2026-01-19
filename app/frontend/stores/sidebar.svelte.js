@@ -18,6 +18,15 @@ export class SidebarStore {
     // Listen for room-read events from chat
     this.roomReadHandler = (e) => this.handleRoomRead(e.detail.roomId)
     window.addEventListener('room-read', this.roomReadHandler)
+    
+    // Check if we're currently viewing a room and mark it as read
+    const currentRoomMeta = document.querySelector('meta[name="current-room-id"]')
+    if (currentRoomMeta) {
+      const currentRoomId = parseInt(currentRoomMeta.content, 10)
+      if (currentRoomId) {
+        this.handleRoomRead(currentRoomId)
+      }
+    }
   }
   
   handleRoomRead(roomId) {

@@ -1,12 +1,12 @@
 <script>
   let { users = [] } = $props();
 
-  let typingText = $derived(() => {
-    if (users.length === 0) return "";
-    if (users.length === 1) return `${users[0].name} is typing...`;
-    if (users.length === 2) return `${users[0].name} and ${users[1].name} are typing...`;
-    return `${users[0].name} and ${users.length - 1} others are typing...`;
-  });
+  let typingText = $derived(
+    users.length === 0 ? "" :
+    users.length === 1 ? `${users[0].name} is typing...` :
+    users.length === 2 ? `${users[0].name} and ${users[1].name} are typing...` :
+    `${users[0].name} and ${users.length - 1} others are typing...`
+  );
 </script>
 
 {#if users.length > 0}
@@ -16,7 +16,7 @@
       <span class="typing-indicator__dot"></span>
       <span class="typing-indicator__dot"></span>
     </span>
-    <span class="typing-indicator__text txt-small">{typingText()}</span>
+    <span class="typing-indicator__text txt-small">{typingText}</span>
   </div>
 {/if}
 
