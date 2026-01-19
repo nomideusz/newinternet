@@ -46,6 +46,7 @@
 </div>
 
 <style>
+  /* Component-specific layout - app CSS handles utilities like .center, .pad, .translucent, .for-screen-reader */
   .message-area {
     display: flex;
     flex-direction: column;
@@ -60,32 +61,5 @@
     justify-content: center;
     flex: 1;
     padding: 2rem;
-  }
-
-  .center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .pad {
-    padding: 2rem;
-  }
-
-  .translucent {
-    opacity: 0.5;
-  }
-
-  .for-screen-reader {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
   }
 </style>

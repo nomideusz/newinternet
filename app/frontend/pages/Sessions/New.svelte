@@ -208,6 +208,7 @@
 </section>
 
 <style>
+  /* Login-specific layout - leverages app CSS utilities */
   .login-section {
     display: flex;
     flex-direction: column;
@@ -270,23 +271,5 @@
     border: none;
     background: transparent;
     outline: none;
-  }
-
-  .btn--reversed {
-    width: 100%;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  .txt-danger {
-    color: var(--color-danger, #dc3545);
-  }
-
-  .margin-block-double {
-    margin-block: 2rem;
-  }
-
-  .txt-subtle {
-    opacity: 0.6;
   }
 </style>

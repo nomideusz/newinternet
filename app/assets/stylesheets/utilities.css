@@ -22,7 +22,10 @@
 .txt-primary { color: var(--color-text); }
 .txt-reversed { color: var(--color-text-reversed); }
 .txt-negative { color: var(--color-negative); }
+.txt-danger { color: var(--color-negative); } /* Alias for txt-negative */
+.txt-warn { color: var(--color-warn, #e53935); }
 .txt-subtle { color: var(--color-border-darker); }
+.txt-muted { opacity: 0.6; }
 .txt-undecorated { text-decoration: none; }
 .txt-tight-lines { line-height: 1.2; }
 .txt-normal { font-weight: 400; font-style: normal; }

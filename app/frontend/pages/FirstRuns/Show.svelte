@@ -191,6 +191,7 @@
 </div>
 
 <style>
+  /* First-run setup specific layout - leverages app CSS utilities */
   .center {
     display: flex;
     flex-direction: column;
@@ -242,28 +243,6 @@
     border: none;
     background: transparent;
     outline: none;
-  }
-
-  .btn--reversed {
-    width: 100%;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  .txt-danger {
-    color: var(--color-danger, #dc3545);
-  }
-
-  .txt-muted {
-    opacity: 0.6;
-  }
-
-  .margin-block {
-    margin-block: 1rem;
-  }
-
-  .margin-block-start {
-    margin-block-start: 1rem;
   }
 
   .pad-block {

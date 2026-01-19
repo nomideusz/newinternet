@@ -131,6 +131,7 @@
 </div>
 
 <style>
+  /* Component-specific layout - leverages app CSS utilities */
   .directs--edit {
     display: flex;
     flex-wrap: wrap;
@@ -141,9 +142,5 @@
   .member {
     min-width: 12ch;
     align-items: center;
-  }
-
-  .txt-warn {
-    color: var(--color-warn, #e53935);
   }
 </style>
