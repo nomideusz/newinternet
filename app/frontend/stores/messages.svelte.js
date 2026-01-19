@@ -6,6 +6,7 @@ export class MessagesStore {
   typingUsers = $state([])
   subscription = null
   typingSubscription = null
+  typingSubscriptionConnected = false
   presenceSubscription = null
   currentUserId = null
 
@@ -128,6 +129,12 @@ export class MessagesStore {
     })
 
     this.typingSubscription = subscribeToTyping(roomId, {
+      onConnected: () => {
+        this.typingSubscriptionConnected = true
+      },
+      onDisconnected: () => {
+        this.typingSubscriptionConnected = false
+      },
       onData: (data) => {
         // Filter out our own typing notifications
         if (data.user && data.user.id === this.currentUserId) return
@@ -174,19 +181,20 @@ export class MessagesStore {
         // Subscription may already be unsubscribed or never connected
       }
       this.typingSubscription = null
+      this.typingSubscriptionConnected = false
     }
     this.typingUsers = []
   }
 
-  // Send typing notification
+  // Send typing notification - only if subscription is confirmed
   startTyping() {
-    if (this.typingSubscription) {
+    if (this.typingSubscription && this.typingSubscriptionConnected) {
       this.typingSubscription.perform("start", {})
     }
   }
 
   stopTyping() {
-    if (this.typingSubscription) {
+    if (this.typingSubscription && this.typingSubscriptionConnected) {
       this.typingSubscription.perform("stop", {})
     }
   }

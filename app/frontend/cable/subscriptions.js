@@ -42,6 +42,12 @@ export function subscribeToTyping(roomId, callbacks = {}) {
       received(data) {
         if (callbacks.onData) callbacks.onData(data)
       },
+      connected() {
+        if (callbacks.onConnected) callbacks.onConnected()
+      },
+      disconnected() {
+        if (callbacks.onDisconnected) callbacks.onDisconnected()
+      },
       ...callbacks
     }
   )
