@@ -1,5 +1,5 @@
 <script>
-  import { onMount, tick } from "svelte";
+  import { onMount, tick, untrack } from "svelte";
   import Message from "./Message.svelte";
 
   let {
@@ -10,7 +10,7 @@
     scrollRef = $bindable(),
   } = $props();
 
-  // Use regular variables for tracking
+  // Use regular variables for tracking - completely outside Svelte's reactivity
   let previousMessageCount = 0;
   let isNearBottom = true;
   let initialScrollDone = false;
@@ -48,21 +48,6 @@
     if (onscroll) onscroll(event);
   }
 
-  // Check for new messages and auto-scroll - called manually, not in an effect
-  function checkForNewMessages() {
-    const currentCount = messages.length;
-    if (initialScrollDone && currentCount > previousMessageCount) {
-      const wasNearBottom = isNearBottom;
-      tick().then(() => {
-        if (wasNearBottom) {
-          scrollToBottom("smooth");
-        }
-        checkIfNearBottom();
-      });
-    }
-    previousMessageCount = currentCount;
-  }
-
   // Scroll to anchor message if specified, otherwise scroll to bottom on mount
   onMount(async () => {
     await tick();
@@ -82,28 +67,32 @@
     checkIfNearBottom();
   });
   
-  // Use $derived to track message count changes without causing effect loops
-  // This creates a reactive binding that we can use to trigger side effects
-  let messageCount = $derived(messages.length);
-  
-  // Use $effect.pre to react to message count changes before render
-  $effect.pre(() => {
-    // Access messageCount to create the dependency
-    const count = messageCount;
-    // Schedule the scroll check after the current batch
-    if (initialScrollDone && count > previousMessageCount) {
+  // Auto-scroll when new messages arrive
+  // Use untrack for all reads/writes except the dependency we want to track
+  $effect(() => {
+    // This is the ONLY thing we want to track - message count changes
+    const currentCount = messages.length;
+    
+    // Use untrack for everything else to prevent effect loops
+    untrack(() => {
+      if (!initialScrollDone) return;
+      if (currentCount <= previousMessageCount) {
+        previousMessageCount = currentCount;
+        return;
+      }
+      
+      // New messages arrived
       const wasNearBottom = isNearBottom;
-      // Use queueMicrotask to run after the effect but before paint
-      queueMicrotask(() => {
-        tick().then(() => {
-          if (wasNearBottom) {
-            scrollToBottom("smooth");
-          }
-          checkIfNearBottom();
-        });
+      previousMessageCount = currentCount;
+      
+      // Schedule scroll after DOM update
+      tick().then(() => {
+        if (wasNearBottom && scrollRef) {
+          scrollToBottom("smooth");
+        }
+        checkIfNearBottom();
       });
-    }
-    previousMessageCount = count;
+    });
   });
 </script>
 
