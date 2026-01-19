@@ -85,8 +85,8 @@
       const wasNearBottom = isNearBottom;
       previousMessageCount = currentCount;
       
-      // Schedule scroll after DOM update
-      tick().then(() => {
+      // Use requestAnimationFrame to schedule scroll completely outside Svelte's cycle
+      requestAnimationFrame(() => {
         if (wasNearBottom && scrollRef) {
           scrollToBottom("smooth");
         }
