@@ -1,2 +1,12 @@
 #!/usr/bin/env ruby
-exec "./bin/rails", "server", *ARGV
+
+# Check if foreman is available, otherwise run rails directly
+# Check if foreman is available via Bundler
+if system("bundle show foreman > /dev/null 2>&1")
+  exec "bundle", "exec", "foreman", "start", "-f", "Procfile.dev", *ARGV
+elsif system("which foreman > /dev/null 2>&1")
+  exec "foreman", "start", "-f", "Procfile.dev", *ARGV
+else
+  # Fallback: just run Rails (Vite must be started separately with `npm run dev`)
+  exec "./bin/rails", "server", "-b", "0.0.0.0", *ARGV
+end

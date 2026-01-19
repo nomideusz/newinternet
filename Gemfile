@@ -21,10 +21,14 @@ gem "resque-pool", "~> 0.7.1"
 # Assets
 gem "propshaft", github: "rails/propshaft"
 gem "importmap-rails", github: "rails/importmap-rails"
+gem "vite_rails"
 
 # Hotwire
 gem "turbo-rails", github: "hotwired/turbo-rails"
 gem "stimulus-rails"
+
+# Inertia (for Svelte SPA)
+gem "inertia_rails"
 
 # Media handling
 gem "image_processing", ">= 1.2"
@@ -53,6 +57,7 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
   gem "faker", require: false
   gem "brakeman", require: false
+  gem "foreman"
 end
 
 group :test do

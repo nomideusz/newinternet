@@ -1,0 +1,19 @@
+{
+  "name": "newinternet",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "vite": "^7.3.1",
+    "vite-plugin-rails": "^0.5.0"
+  },
+  "dependencies": {
+    "@inertiajs/svelte": "^2.0.0",
+    "@rails/actioncable": "^8.1.200",
+    "svelte": "^5.16.2"
+  }
+}

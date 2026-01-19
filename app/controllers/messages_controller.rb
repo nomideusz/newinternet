@@ -23,6 +23,16 @@ class MessagesController < ApplicationController
 
     @message.broadcast_create
     deliver_webhooks_to_bots
+
+    # For JSON/fetch requests (from Svelte Composer), return no content
+    # since the message is broadcast via ActionCable
+    # For Turbo Stream requests, Rails will render create.turbo_stream.erb
+    # For regular HTML requests, redirect to the room
+    respond_to do |format|
+      format.json { head :no_content }
+      format.turbo_stream
+      format.html { redirect_to room_url(@room) }
+    end
   rescue ActiveRecord::RecordNotFound
     render action: :room_not_found
   end

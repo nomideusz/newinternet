@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%= page_title_tag %>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, interactive-widget=resizes-content">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= tag.link rel: "manifest", href: webmanifest_path(format: :json) %>
+    <%= tag.link rel: "icon", href: fresh_account_logo_path, type: "image/png" %>
+    <%= tag.link rel: "apple-touch-icon", href: fresh_account_logo_path %>
+
+    <%# Load existing CSS styles %>
+    <%= stylesheet_link_tag :all, "data-turbo-track": "reload" %>
+
+    <style>
+      /* Inertia root element styles */
+      #app {
+        display: contents;
+      }
+
+      /* Prevent sidebar flicker during Inertia navigation */
+      #sidebar {
+        /* Keep sidebar visible and stable during page transitions */
+        contain: layout style;
+      }
+
+      #sidebar:empty {
+        /* Hide empty state to prevent flash */
+        visibility: hidden;
+      }
+
+      #sidebar:not(:empty) {
+        visibility: visible;
+      }
+
+      /* Smooth transitions for main content area */
+      #main-content {
+        /* Prevent layout shift */
+        min-height: 100dvh;
+      }
+
+      /* Optional: fade transition for page content */
+      .inertia-loading #main-content {
+        opacity: 0.7;
+        transition: opacity 150ms ease-out;
+      }
+    </style>
+
+    <%# Load Vite + Svelte + Inertia %>
+    <% if Rails.env.development? %>
+      <script type="module" src="http://localhost:3036/@vite/client"></script>
+      <script type="module" src="http://localhost:3036/app/frontend/entrypoints/inertia.js"></script>
+    <% else %>
+      <%= vite_javascript_tag 'inertia', crossorigin: 'anonymous' %>
+    <% end %>
+  </head>
+
+  <body class="<%= body_classes %>" data-controller="local-time lightbox">
+    <a href="#main-content" class="skip-navigation btn">Skip to main content</a>
+
+    <nav id="nav">
+      <%# Nav content rendered by Svelte components %>
+    </nav>
+
+    <main id="main-content" data-turbo="false">
+      <%= yield %>
+    </main>
+
+    <aside id="sidebar" data-controller="toggle-class" data-toggle-class-toggle-class="open">
+      <%# Sidebar content rendered by Svelte components %>
+    </aside>
+
+    <%= render "layouts/lightbox" %>
+
+    <a href="/" id="app-logo" aria-label="New Internet home page">
+      <%= image_tag "ni-logo.svg", alt: "New Internet" %>
+    </a>
+  </body>
+</html>

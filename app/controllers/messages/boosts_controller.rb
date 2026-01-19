@@ -2,6 +2,10 @@ class Messages::BoostsController < ApplicationController
   before_action :set_message
 
   def index
+    respond_to do |format|
+      format.html
+      format.json { render json: @message.boosts }
+    end
   end
 
   def new
@@ -11,7 +15,12 @@ class Messages::BoostsController < ApplicationController
     @boost = @message.boosts.create!(boost_params)
 
     broadcast_create
-    redirect_to message_boosts_url(@message)
+
+    respond_to do |format|
+      format.html { redirect_to message_boosts_url(@message) }
+      format.turbo_stream
+      format.json { head :no_content }
+    end
   end
 
   def destroy
@@ -19,6 +28,12 @@ class Messages::BoostsController < ApplicationController
     @boost.destroy!
 
     broadcast_remove
+
+    respond_to do |format|
+      format.html { redirect_to message_boosts_url(@message) }
+      format.turbo_stream
+      format.json { head :no_content }
+    end
   end
 
   private

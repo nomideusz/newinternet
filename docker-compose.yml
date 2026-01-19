@@ -1,0 +1,30 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+      - node_modules:/rails/node_modules
+    ports:
+      - "3000:3000"
+      - "3036:3036"
+    environment:
+      - RAILS_ENV=development
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    command: ["sh", "-c", "rm -f tmp/pids/server.pid && sed -i 's/\\r$//' bin/* Procfile.dev && bundle check || bundle install && bin/dev"]
+    tty: true
+    stdin_open: true
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+
+volumes:
+  bundle_cache:
+  node_modules:
+  redis_data:

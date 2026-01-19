@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(bundle install:*)",
+      "Bash(where:*)",
+      "Bash(npm install:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker exec:*)",
+      "Bash(npm run dev:*)",
+      "Bash(docker restart:*)",
+      "Bash(docker logs:*)",
+      "Bash(curl:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(docker-compose down:*)",
+      "Bash(docker compose:*)",
+      "WebSearch",
+      "mcp__acp__Edit"
+    ]
+  }
+}

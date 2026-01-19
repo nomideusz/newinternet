@@ -10,12 +10,12 @@ Rails.application.routes.draw do
   resource :session, only: %i[ new destroy ] do
     # These collection routes inside 'resource' can cause naming confusion.
     # explicit routes below handle options/create.
-    
+
     scope module: "sessions" do
       resources :transfers, only: %i[ show update ]
     end
   end
-  
+
   post "session/options", to: "sessions#options", as: :session_options
   post "session", to: "sessions#create", as: :session_create # session_path(method: :post) is standard but explicit create helper is fine too
 
@@ -36,7 +36,7 @@ Rails.application.routes.draw do
   end
 
   direct :fresh_account_logo do |options|
-    route_for :account_logo, v: Current.account&.updated_at&.to_fs(:number), size: options[:size]
+    route_for :account_logo, v: Current.account&.updated_at&.to_fs(:number), size: options[:size], **options
   end
 
   # Registration via join code (WebAuthn registration)
@@ -68,7 +68,7 @@ Rails.application.routes.draw do
   end
 
   direct :fresh_user_avatar do |user, options|
-    route_for :user_avatar, user.avatar_token, v: user.updated_at.to_fs(:number)
+    route_for :user_avatar, user.avatar_token, v: user.updated_at.to_fs(:number), **options
   end
 
   resources :rooms do
@@ -107,4 +107,10 @@ Rails.application.routes.draw do
   get "service-worker" => "pwa#service_worker"
 
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # Inertia + Svelte demo (proof of concept)
+  get "demo" => "demo#show"
+
+  # Svelte reactivity test page
+  get "test/reactivity" => "test#reactivity"
 end
