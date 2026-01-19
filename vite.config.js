@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import ViteRails from "vite-plugin-rails";
 import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";
 
@@ -7,15 +8,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default defineConfig({
-  plugins: [svelte()],
+  plugins: [
+    ViteRails(),
+    svelte(),
+  ],
   resolve: {
     alias: {
       "@": resolve(__dirname, "app/frontend"),
       images: resolve(__dirname, "app/assets/images"),
     },
   },
-  root: resolve(__dirname),
-  publicDir: resolve(__dirname, "public"),
   server: {
     port: 3036,
     strictPort: false,
@@ -34,12 +36,5 @@ export default defineConfig({
     },
     // Allow requests from any origin
     allowedHosts: "all",
-  },
-  build: {
-    manifest: true,
-    outDir: resolve(__dirname, "public/vite"),
-    rollupOptions: {
-      input: resolve(__dirname, "app/frontend/entrypoints/inertia.js"),
-    },
   },
 });
