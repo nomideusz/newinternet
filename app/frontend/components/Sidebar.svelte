@@ -38,7 +38,7 @@
     }
 
     function navigateToProfile() {
-        router.visit("/profile");
+        router.visit("/users/me/profile");
     }
 
     function navigateToSettings() {
@@ -145,7 +145,7 @@
 
 <div class="flex align-end sidebar__tools gap justify-end">
     <a
-        href="/profile"
+        href="/users/me/profile"
         class="btn avatar flex-item-no-shrink sidebar__tool"
         onclick={(e) => {
             e.preventDefault();
