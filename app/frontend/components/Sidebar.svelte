@@ -1,6 +1,6 @@
 <script>
     import { router } from "@inertiajs/svelte";
-    import { onDestroy } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import DirectRoomItem from "./DirectRoomItem.svelte";
     import SharedRoomItem from "./SharedRoomItem.svelte";
     import DirectPlaceholder from "./DirectPlaceholder.svelte";
@@ -28,13 +28,9 @@
         store.init(directMemberships, otherMemberships);
     });
 
-    // Connect only once when currentUser is available, and only reconnect if user changes
-    $effect(() => {
-        if (currentUser && currentUser.id !== connectedUserId) {
-            // Disconnect from previous user if any
-            if (connectedUserId !== null) {
-                store.disconnect();
-            }
+    // Connect on mount
+    onMount(() => {
+        if (currentUser?.id) {
             connectedUserId = currentUser.id;
             store.connect(currentUser.id);
         }

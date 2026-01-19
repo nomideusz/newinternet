@@ -1,5 +1,5 @@
 <script>
-  import { onMount, onDestroy, mount, unmount } from "svelte";
+  import { onMount, onDestroy, mount, unmount, untrack } from "svelte";
   import RoomNav from "../../components/RoomNav.svelte";
   import MessageList from "../../components/MessageList.svelte";
   import Composer from "../../components/Composer.svelte";
@@ -29,19 +29,13 @@
     store.currentUserId = currentUser?.id;
   });
 
-  // Connect only when room changes
-  $effect(() => {
-    if (room && room.id !== connectedRoomId) {
-      // Disconnect from previous room if any
-      if (connectedRoomId !== null) {
-        store.disconnect();
-      }
+  // Connect only when room changes - use onMount for initial connection
+  onMount(() => {
+    if (room?.id) {
       connectedRoomId = room.id;
       store.connect(room.id);
     }
-  });
-
-  onMount(() => {
+    
     // Mount nav into the #nav element
     const navEl = document.getElementById("nav");
     if (navEl) {
