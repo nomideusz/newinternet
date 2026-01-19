@@ -2,11 +2,16 @@
 class FirstRunsController < ApplicationController
   allow_unauthenticated_access
 
+  layout "inertia", only: :show
+
   before_action :prevent_repeats
 
   # GET /first_run - Show first-run setup form
   def show
-    @user = User.new
+    render inertia: "FirstRuns/Show", props: {
+      optionsUrl: first_run_options_path,
+      callbackUrl: first_run_path
+    }
   end
 
   # POST /first_run/options - Generate WebAuthn creation options for admin
