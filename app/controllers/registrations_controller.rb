@@ -2,13 +2,20 @@
 class RegistrationsController < ApplicationController
   allow_unauthenticated_access
 
+  layout "inertia", only: :new
+
   before_action :ensure_account_exists
   before_action :validate_join_code
 
   # GET /join/:join_code - Show registration form
   def new
-    @user = User.new
     @join_code = params[:join_code]
+    render inertia: "Registrations/New", props: {
+      accountName: Current.account.name,
+      joinCode: @join_code,
+      optionsUrl: join_options_path(@join_code),
+      callbackUrl: join_callback_path(@join_code)
+    }
   end
 
   # POST /join/:join_code/options - Generate WebAuthn creation options

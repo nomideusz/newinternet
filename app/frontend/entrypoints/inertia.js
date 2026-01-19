@@ -17,6 +17,7 @@ const pagesWithSidebar = [
   "Users/Profiles/Show",
   "Accounts/Edit",
   "Searches/Index",
+  "Welcome/Show",
   "Test/Reactivity",
 ];
 
