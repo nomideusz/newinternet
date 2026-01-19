@@ -1,5 +1,5 @@
 class Rooms::OpensController < RoomsController
-  layout "inertia", only: :new
+  layout "inertia", only: %i[new edit]
 
   before_action :set_room, only: %i[ show edit update ]
   before_action :ensure_can_administer, only: %i[ update ]
@@ -42,7 +42,26 @@ class Rooms::OpensController < RoomsController
   end
 
   def edit
+    load_sidebar_data
     @users = User.active.ordered
+
+    render inertia: "Rooms/Opens/Edit", props: {
+      page: { title: "Edit #{@room.name}", bodyClass: "sidebar" },
+      room: RoomPresenter.new(@room, current_user: Current.user).as_json,
+      users: UserPresenter.collection(@users, view: :minimal),
+      selectedUserIds: @room.users.pluck(:id),
+      isOpenRoom: @room.is_a?(Rooms::Open),
+      typeChangePath: edit_rooms_closed_path(@room),
+      cancelUrl: room_path(@room),
+      currentUser: UserPresenter.new(Current.user, view: :minimal).as_json,
+      canAdminister: Current.user.can_administer?(@room),
+      sidebar: {
+        directMemberships: MembershipPresenter.collection(@direct_memberships, view: :sidebar),
+        otherMemberships: MembershipPresenter.collection(@other_memberships, view: :sidebar),
+        directPlaceholderUsers: UserPresenter.collection(@direct_placeholder_users, view: :minimal),
+        canCreateRooms: Current.user.administrator? || !Current.account.settings.restrict_room_creation_to_administrators?
+      }
+    }
   end
 
   def update

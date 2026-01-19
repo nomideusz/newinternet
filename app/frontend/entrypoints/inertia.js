@@ -12,6 +12,7 @@ const pagesWithSidebar = [
   "Rooms/Show",
   "Rooms/Directs/New",
   "Rooms/Opens/New",
+  "Rooms/Opens/Edit",
   "Users/Sidebars/Show",
   "Users/Profiles/Show",
   "Accounts/Edit",

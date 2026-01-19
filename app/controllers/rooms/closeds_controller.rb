@@ -1,4 +1,6 @@
 class Rooms::ClosedsController < RoomsController
+  layout "inertia", only: :edit
+
   before_action :set_room, only: %i[ show edit update ]
   before_action :ensure_can_administer, only: %i[ update ]
   before_action :remember_last_room_visited, only: :show
@@ -24,8 +26,27 @@ class Rooms::ClosedsController < RoomsController
   end
 
   def edit
+    load_sidebar_data
+    @users = User.active.ordered
     selected_user_ids = @room.users.pluck(:id)
-    @selected_users, @unselected_users = User.active.ordered.partition { |user| selected_user_ids.include?(user.id) }
+
+    render inertia: "Rooms/Opens/Edit", props: {
+      page: { title: "Edit #{@room.name}", bodyClass: "sidebar" },
+      room: RoomPresenter.new(@room, current_user: Current.user).as_json,
+      users: UserPresenter.collection(@users, view: :minimal),
+      selectedUserIds: selected_user_ids,
+      isOpenRoom: false,
+      typeChangePath: edit_rooms_open_path(@room),
+      cancelUrl: room_path(@room),
+      currentUser: UserPresenter.new(Current.user, view: :minimal).as_json,
+      canAdminister: Current.user.can_administer?(@room),
+      sidebar: {
+        directMemberships: MembershipPresenter.collection(@direct_memberships, view: :sidebar),
+        otherMemberships: MembershipPresenter.collection(@other_memberships, view: :sidebar),
+        directPlaceholderUsers: UserPresenter.collection(@direct_placeholder_users, view: :minimal),
+        canCreateRooms: Current.user.administrator? || !Current.account.settings.restrict_room_creation_to_administrators?
+      }
+    }
   end
 
   def update
