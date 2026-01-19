@@ -12,8 +12,8 @@
     page,
     room,
     users = [],
-    selectedUserIds: initialSelectedUserIds = [],
-    isOpenRoom: initialIsOpenRoom = true,
+    selectedUserIds: propSelectedUserIds = [],
+    isOpenRoom: propIsOpenRoom = true,
     typeChangePath,
     cancelUrl,
     currentUser = null,
@@ -21,11 +21,19 @@
     canAdminister = false,
   } = $props();
 
+  // Extract initial values (these don't change after mount - intentionally capturing initial props)
+  // svelte-ignore state_referenced_locally
+  const initialRoomName = room?.name || "";
+  // svelte-ignore state_referenced_locally
+  const initialIsOpenRoom = propIsOpenRoom;
+  // svelte-ignore state_referenced_locally
+  const initialSelectedUserIds = propSelectedUserIds;
+
   // Nav instance
   let navInstance = null;
 
   // Form state
-  let roomName = $state(room?.name || "");
+  let roomName = $state(initialRoomName);
   let isSubmitting = $state(false);
   let searchQuery = $state("");
   let showDeleteConfirm = $state(false);
@@ -400,6 +408,7 @@
 {#if showDeleteConfirm}
   <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
   <div class="modal-backdrop" onclick={cancelDelete} role="presentation">
+    <!-- svelte-ignore a11y_interactive_supports_focus -->
     <div
       class="modal-content modal-content--small"
       role="dialog"

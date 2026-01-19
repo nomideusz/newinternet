@@ -13,9 +13,9 @@
     currentUser = null,
   } = $props();
 
-  // Form state
-  const initialRoomName = room?.name || "New room";
-  let roomName = $state(initialRoomName);
+  // Form state - extract initial value from prop (static after mount)
+  // svelte-ignore state_referenced_locally
+  let roomName = $state(room?.name || "New room");
   let isSubmitting = $state(false);
   let searchQuery = $state("");
   let modalRef = $state(null);
@@ -172,8 +172,8 @@
           />
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Access</label>
+        <fieldset class="form-group">
+          <legend class="form-label">Access</legend>
           <div class="access-section">
             <div class="access-header">
               <figure class="avatar avatar--icon">
@@ -264,7 +264,7 @@
               {/each}
             </div>
           </div>
-        </div>
+        </fieldset>
       </div>
 
       <!-- Modal footer -->
