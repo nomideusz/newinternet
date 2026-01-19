@@ -1,5 +1,6 @@
 <script>
     import { router } from "@inertiajs/svelte";
+    import { onDestroy } from "svelte";
     import DirectRoomItem from "./DirectRoomItem.svelte";
     import SharedRoomItem from "./SharedRoomItem.svelte";
     import DirectPlaceholder from "./DirectPlaceholder.svelte";
@@ -30,14 +31,18 @@
     // Connect only once when currentUser is available, and only reconnect if user changes
     $effect(() => {
         if (currentUser && currentUser.id !== connectedUserId) {
+            // Disconnect from previous user if any
+            if (connectedUserId !== null) {
+                store.disconnect();
+            }
             connectedUserId = currentUser.id;
             store.connect(currentUser.id);
         }
-        return () => {
-            // Only disconnect when component is destroyed
-            store.disconnect();
-            connectedUserId = null;
-        };
+    });
+
+    onDestroy(() => {
+        store.disconnect();
+        connectedUserId = null;
     });
 
     function closeSidebarOnMobile() {

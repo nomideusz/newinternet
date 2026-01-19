@@ -32,13 +32,13 @@
   // Connect only when room changes
   $effect(() => {
     if (room && room.id !== connectedRoomId) {
+      // Disconnect from previous room if any
+      if (connectedRoomId !== null) {
+        store.disconnect();
+      }
       connectedRoomId = room.id;
       store.connect(room.id);
     }
-    return () => {
-      store.disconnect();
-      connectedRoomId = null;
-    };
   });
 
   onMount(() => {
@@ -54,6 +54,10 @@
   });
 
   onDestroy(() => {
+    // Disconnect from room
+    store.disconnect();
+    connectedRoomId = null;
+    
     // Clean up nav component
     if (navInstance) {
       try {
