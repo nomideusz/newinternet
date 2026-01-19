@@ -11,6 +11,9 @@
     users = [],
     sidebar = {},
     currentUser = null,
+    isOpenRoom: propIsOpenRoom = true,
+    typeChangePath,
+    cancelUrl,
   } = $props();
 
   // Form state - extract initial value from prop (static after mount)
@@ -21,7 +24,8 @@
   let modalRef = $state(null);
 
   // Room type: true = open (everyone), false = closed (selected users)
-  let isOpenRoom = $state(true);
+  // svelte-ignore state_referenced_locally
+  let isOpenRoom = $state(propIsOpenRoom);
 
   // Selected users for closed room
   let selectedUserIds = $state(new Set());

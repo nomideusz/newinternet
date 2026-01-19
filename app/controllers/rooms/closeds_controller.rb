@@ -1,5 +1,5 @@
 class Rooms::ClosedsController < RoomsController
-  layout "inertia", only: :edit
+  layout "inertia", only: %i[new edit]
 
   before_action :set_room, only: %i[ show edit update ]
   before_action :ensure_can_administer, only: %i[ update ]
@@ -14,8 +14,25 @@ class Rooms::ClosedsController < RoomsController
   end
 
   def new
-    @room  = Rooms::Closed.new(name: DEFAULT_ROOM_NAME)
+    load_sidebar_data
+    @room = Rooms::Closed.new(name: DEFAULT_ROOM_NAME)
     @users = User.active.ordered
+
+    render inertia: "Rooms/Opens/New", props: {
+      page: { title: "New Room", bodyClass: "sidebar" },
+      room: { name: @room.name },
+      users: UserPresenter.collection(@users, view: :minimal),
+      isOpenRoom: false,
+      typeChangePath: new_rooms_open_path,
+      cancelUrl: user_sidebar_path,
+      currentUser: UserPresenter.new(Current.user, view: :minimal).as_json,
+      sidebar: {
+        directMemberships: MembershipPresenter.collection(@direct_memberships, view: :sidebar),
+        otherMemberships: MembershipPresenter.collection(@other_memberships, view: :sidebar),
+        directPlaceholderUsers: UserPresenter.collection(@direct_placeholder_users, view: :minimal),
+        canCreateRooms: Current.user.administrator? || !Current.account.settings.restrict_room_creation_to_administrators?
+      }
+    }
   end
 
   def create
