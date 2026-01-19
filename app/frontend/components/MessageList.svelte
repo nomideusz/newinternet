@@ -1,5 +1,5 @@
 <script>
-  import { onMount, tick, untrack } from "svelte";
+  import { onMount, tick } from "svelte";
   import Message from "./Message.svelte";
 
   let {
@@ -10,9 +10,10 @@
     scrollRef = $bindable(),
   } = $props();
 
-  let previousMessageCount = $state(0);
-  let isNearBottom = $state(true);
-  let initialScrollDone = $state(false);
+  // Use regular variables (not $state) for tracking to avoid effect loops
+  let previousMessageCount = 0;
+  let isNearBottom = true;
+  let initialScrollDone = false;
 
   function isSameDay(date1, date2) {
     const d1 = new Date(date1);
@@ -70,13 +71,9 @@
   $effect(() => {
     const currentCount = messages.length;
     
-    // Use untrack to read state without creating dependency
-    const wasNearBottom = untrack(() => isNearBottom);
-    const prevCount = untrack(() => previousMessageCount);
-    const scrollDone = untrack(() => initialScrollDone);
-    
-    if (scrollDone && currentCount > prevCount) {
+    if (initialScrollDone && currentCount > previousMessageCount) {
       // New message(s) arrived
+      const wasNearBottom = isNearBottom;
       tick().then(() => {
         if (wasNearBottom) {
           // User was near bottom, auto-scroll to show new message
