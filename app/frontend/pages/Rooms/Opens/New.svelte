@@ -299,110 +299,10 @@
 </div>
 
 <style>
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 1rem;
-  }
+  /* Component-specific styles only */
+  /* Common modal, form, and user-item styles are in shared.css */
 
-  .modal-content {
-    background: #1a1a1a;
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    width: 100%;
-    max-width: 480px;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  @media (prefers-color-scheme: light) {
-    .modal-content {
-      background: #ffffff;
-    }
-  }
-
-  .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .modal-title {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-  }
-
-  .modal-close {
-    --btn-padding: 0.5rem;
-    font-size: 1.25rem;
-    line-height: 1;
-    opacity: 0.6;
-    color: var(--color-text);
-  }
-
-  .modal-close:hover {
-    opacity: 1;
-  }
-
-  .modal-body {
-    padding: 1.25rem;
-    overflow-y: auto;
-    flex: 1;
-  }
-
-  .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    padding: 1rem 1.25rem;
-    border-top: 1px solid var(--color-border);
-  }
-
-  .form-group {
-    margin-bottom: 1.25rem;
-  }
-
-  .form-group:last-child {
-    margin-bottom: 0;
-  }
-
-  .form-label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-  }
-
-  .access-section {
-    background: var(--color-message-bg);
-    border-radius: 0.5rem;
-    overflow: hidden;
-  }
-
-  .access-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-  }
-
-  .access-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-  }
-
+  /* Custom switch control for room type toggle */
   .switch-btn {
     background: none;
     border: none;
@@ -444,6 +344,7 @@
     transform: translateX(1.25rem);
   }
 
+  /* Selection controls bar */
   .selection-controls {
     display: flex;
     align-items: center;
@@ -468,41 +369,25 @@
     border-top: 1px solid var(--color-border);
   }
 
-  .user-list {
-    max-height: 200px;
-    overflow-y: auto;
-    border-top: 1px solid var(--color-border);
+  /* Access/user list section */
+  .access-section {
+    background: var(--color-message-bg);
+    border-radius: 0.5rem;
+    overflow: hidden;
   }
 
-  .user-item {
+  .access-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.5rem 1rem;
-    width: 100%;
-    background: none;
-    border: none;
-    text-align: left;
-    color: inherit;
-    font: inherit;
-    cursor: default;
+    padding: 0.75rem 1rem;
   }
 
-  .user-item--selectable {
-    cursor: pointer;
-  }
-
-  .user-item--selectable:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .user-item:disabled {
-    opacity: 0.7;
-  }
-
-  .user-item .avatar {
-    --avatar-size: 2rem;
-    flex-shrink: 0;
+  .access-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
   }
 
   .user-info {

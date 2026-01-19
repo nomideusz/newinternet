@@ -2,6 +2,9 @@ import { createInertiaApp, router } from "@inertiajs/svelte";
 import { mount } from "svelte";
 import { sidebarManager } from "../stores/sidebarManager.svelte.js";
 
+// Import shared styles for Svelte components
+import "../styles/shared.css";
+
 console.log("[Inertia] Initializing Inertia app...");
 
 // Disable the default progress bar by providing empty handlers

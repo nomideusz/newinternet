@@ -439,12 +439,9 @@
 {/if}
 
 <style>
-  .panel {
-    max-width: 40rem;
-    margin-inline: auto;
-    padding: var(--block-space);
-  }
-
+  /* Component-specific layout styles only */
+  /* Common styles are in app/frontend/styles/shared.css */
+  
   .room-access {
     max-height: 60vh;
     overflow-y: auto;
@@ -455,37 +452,6 @@
     flex-direction: column;
   }
 
-  .user-item {
-    padding: 0.5rem;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    border-radius: var(--border-radius);
-    transition: background-color 0.15s ease;
-  }
-
-  .user-item:hover:not(:disabled) {
-    background-color: var(--color-fill-quaternary);
-  }
-
-  .user-item--selected {
-    background-color: var(--color-fill-tertiary);
-  }
-
-  .user-item--selectable {
-    cursor: pointer;
-  }
-
-  .user-item:disabled {
-    cursor: default;
-    opacity: 0.7;
-  }
-
-  .user-list {
-    max-height: 300px;
-    overflow-y: auto;
-  }
-
   .selection-controls {
     padding-inline: 0.5rem;
   }
@@ -494,35 +460,11 @@
     margin-top: var(--block-space);
   }
 
-  .modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-
-  .modal-content {
-    background: var(--color-bg);
-    border-radius: var(--border-radius-large);
-    padding: var(--block-space);
-    max-width: 90vw;
-    width: 400px;
-  }
-
-  .modal-content--small {
-    width: 320px;
-  }
-
-  .modal-actions {
-    margin-top: var(--block-space);
-  }
-
+  /* btn--danger uses existing .btn from app CSS */
   .btn--danger {
-    --btn-bg: var(--color-red);
+    --btn-background: var(--color-negative);
     --btn-color: white;
+    --btn-border-color: var(--color-negative);
   }
 
   .icon--small {
@@ -530,6 +472,7 @@
     height: 1.25em;
   }
 
+  /* Use app's colorize utilities when possible */
   .colorize--green {
     filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
   }

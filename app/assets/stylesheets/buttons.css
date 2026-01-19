@@ -154,8 +154,22 @@
   --btn-color: var(--color-text-reversed);
 }
 
+/* Primary action button - same as reversed */
+.btn--primary {
+  --btn-background: var(--color-text);
+  --btn-color: var(--color-text-reversed);
+}
+
+/* Danger/destructive action button - alias for negative */
+.btn--danger {
+  --btn-background: var(--color-negative);
+  --btn-color: var(--color-text-reversed);
+}
+
 .btn--reversed,
-.btn--negative {
+.btn--negative,
+.btn--primary,
+.btn--danger {
   --btn-border-color: transparent;
   --hover-size: 0;
   --hover-filter: brightness(0.7);
