@@ -9,7 +9,6 @@
     import iconMessagesAdd from "images/messages-add.svg";
     import iconAdd from "images/add.svg";
     import iconMenu from "images/menu.svg";
-    import iconSettings from "images/settings.svg";
 
     let {
         directMemberships = [],
@@ -63,11 +62,6 @@
     function navigateToNewRoom() {
         closeSidebarOnMobile();
         router.visit("/rooms/opens/new");
-    }
-
-    function navigateToProfile() {
-        closeSidebarOnMobile();
-        router.visit("/users/me/profile");
     }
 
     function navigateToSettings() {
@@ -171,11 +165,11 @@
 
 <div class="flex align-end sidebar__tools gap justify-end">
     <a
-        href="/users/me/profile"
+        href="/account/edit"
         class="btn avatar flex-item-no-shrink sidebar__tool"
         onclick={(e) => {
             e.preventDefault();
-            navigateToProfile();
+            navigateToSettings();
         }}
     >
         <img
@@ -186,25 +180,6 @@
             alt=""
             style="view-transition-name: avatar-{currentUser?.id}"
         />
-        <span class="for-screen-reader">My Settings</span>
-    </a>
-
-    <a
-        href="/account/edit"
-        class="btn align-center gap txt-reversed sidebar__tool"
-        onclick={(e) => {
-            e.preventDefault();
-            navigateToSettings();
-        }}
-    >
-        <img
-            src={iconSettings}
-            width="20"
-            height="20"
-            aria-hidden="true"
-            alt=""
-            style="view-transition-name: account-settings"
-        />
-        <span class="for-screen-reader">Account Settings</span>
+        <span class="for-screen-reader">Settings</span>
     </a>
 </div>

@@ -7,16 +7,19 @@ class AccountsController < ApplicationController
 
   def edit
     users = account_users.ordered.without_bots
+    memberships = Current.user.memberships.with_ordered_room
 
     render inertia: "Accounts/Edit", props: {
-      page: { title: "Account Settings", bodyClass: "sidebar" },
+      page: { title: "Settings", bodyClass: "sidebar" },
       account: AccountPresenter.new(@account).as_json,
       users: UserPresenter.collection(users, view: :account),
-      currentUser: UserPresenter.new(Current.user, view: :minimal).as_json,
+      currentUser: UserPresenter.new(Current.user, view: :profile).as_json,
       canAdminister: Current.user.can_administer?,
       joinUrl: join_url(Current.account.join_code),
       logoUrl: helpers.fresh_account_logo_path,
       version: Rails.application.config.app_version,
+      memberships: memberships.map { |m| MembershipPresenter.new(m, view: :profile).as_json },
+      transferUrl: helpers.session_transfer_url(Current.user.transfer_id),
       sidebar: {
         directMemberships: MembershipPresenter.collection(@direct_memberships, view: :sidebar),
         otherMemberships: MembershipPresenter.collection(@other_memberships, view: :sidebar),
