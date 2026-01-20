@@ -1,6 +1,7 @@
 import { createInertiaApp, router } from "@inertiajs/svelte";
 import { mount } from "svelte";
 import { sidebarManager } from "../stores/sidebarManager.svelte.js";
+import { navManager } from "../stores/navManager.svelte.js";
 
 // Import shared styles for Svelte components
 import "../styles/shared.css";
@@ -94,6 +95,11 @@ createInertiaApp({
     const pageName = props.initialPage?.component;
     const pageProps = props.initialPage?.props || {};
 
+    // Mount nav avatar (always visible)
+    if (pageProps.currentUser) {
+      navManager.mount({ currentUser: pageProps.currentUser });
+    }
+
     // Mount sidebar using the global manager
     mountSidebarIfNeeded(pageName, pageProps);
 
@@ -114,6 +120,11 @@ if (typeof window !== "undefined") {
     console.log("[Inertia] Navigation event:", event.detail?.page?.component);
     const pageName = event.detail?.page?.component;
     const pageProps = event.detail?.page?.props || {};
+
+    // Mount nav avatar (always visible)
+    if (pageProps.currentUser) {
+      navManager.mount({ currentUser: pageProps.currentUser });
+    }
 
     // Re-mount sidebar if needed after navigation
     mountSidebarIfNeeded(pageName, pageProps);

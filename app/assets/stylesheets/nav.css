@@ -46,6 +46,23 @@
   }
 }
 
+#nav-content {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: var(--inline-space-half);
+  min-width: 0;
+}
+
+#nav-avatar {
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+
+.navbar__avatar {
+  --btn-size: 2.5em;
+}
+
 .skip-navigation {
   --left-offset: -999em;
 

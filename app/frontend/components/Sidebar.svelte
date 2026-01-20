@@ -45,15 +45,6 @@
         connectedUserId = null;
     });
 
-    function closeSidebarOnMobile() {
-        if (window.innerWidth <= 100 * parseFloat(getComputedStyle(document.documentElement).fontSize.replace('px', '')) / 16 * 16) {
-            const sidebar = document.getElementById("sidebar");
-            if (sidebar) {
-                sidebar.classList.add("room-open");
-            }
-        }
-    }
-
     function openSidebarOnMobile() {
         const sidebar = document.getElementById("sidebar");
         if (sidebar) {
@@ -69,11 +60,6 @@
     function navigateToNewRoom() {
         openSidebarOnMobile(); // Keep sidebar visible for new room
         router.visit("/rooms/opens/new");
-    }
-
-    function navigateToSettings() {
-        closeSidebarOnMobile();
-        router.visit("/account/edit");
     }
 
     function handleRoomCreated(e) {
@@ -168,25 +154,4 @@
         <img src={iconMenu} width="20" height="20" aria-hidden="true" alt="" />
         <span class="for-screen-reader">Open menu</span>
     </button>
-</div>
-
-<div class="flex align-end sidebar__tools gap justify-end">
-    <a
-        href="/account/edit"
-        class="btn avatar flex-item-no-shrink sidebar__tool"
-        onclick={(e) => {
-            e.preventDefault();
-            navigateToSettings();
-        }}
-    >
-        <img
-            src={currentUser?.avatar_url}
-            width="48"
-            height="48"
-            aria-hidden="true"
-            alt=""
-            style="view-transition-name: avatar-{currentUser?.id}"
-        />
-        <span class="for-screen-reader">Settings</span>
-    </a>
 </div>

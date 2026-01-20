@@ -43,7 +43,7 @@
     }
 
     // Mount nav
-    const navEl = document.getElementById("nav");
+    const navEl = document.getElementById("nav-content");
     if (navEl) {
       navEl.innerHTML = "";
       navInstance = mount(ProfileNav, {
