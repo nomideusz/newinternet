@@ -10,6 +10,7 @@
 
   import iconArrowLeft from "images/arrow-left.svg";
   import iconCamera from "images/camera.svg";
+  import iconMinus from "images/minus.svg";
   import iconPersonAdd from "images/person-add.svg";
   import iconQrCode from "images/qr-code.svg";
   import iconCopyPaste from "images/copy-paste.svg";
