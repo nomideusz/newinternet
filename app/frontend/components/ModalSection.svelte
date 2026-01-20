@@ -50,10 +50,6 @@
     border-radius: 0.5rem;
   }
 
-  .modal-section--padded + .modal-section--padded {
-    margin-top: 0.75rem;
-  }
-
   .modal-section__header {
     display: flex;
     align-items: flex-start;

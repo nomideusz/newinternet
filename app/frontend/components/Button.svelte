@@ -13,7 +13,7 @@
     children,
   } = $props();
 
-  const Tag = href ? "a" : "button";
+  let Tag = $derived(href ? "a" : "button");
 </script>
 
 <svelte:element
@@ -28,6 +28,7 @@
   class:btn-modern--full-width={fullWidth}
   class:btn-modern--loading={loading}
   class:btn-modern--icon-only={icon && !children}
+  role={!href ? "button" : undefined}
   {type}
   {href}
   {onclick}

@@ -322,7 +322,7 @@
             label="Organization settings"
             description="Change name and logo"
             icon={iconOffice}
-            onclick={() => document.getElementById('org-settings-section')?.scrollIntoView({ behavior: 'smooth' })}}
+            onclick={() => document.getElementById('org-settings-section')?.scrollIntoView({ behavior: 'smooth' })}
           />
         {/if}
       </ModalSection>
@@ -779,48 +779,6 @@
     justify-content: center;
   }
 
-  .regenerate-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--color-border);
-    margin-top: 0.5rem;
-  }
-
-  .regenerate-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.375rem 0.75rem;
-    border: none;
-    background: transparent;
-    font-size: 0.8125rem;
-    color: var(--color-border-darker);
-    cursor: pointer;
-    border-radius: 0.25rem;
-    transition: color 150ms ease, background-color 150ms ease;
-  }
-
-  .regenerate-btn:hover {
-    color: var(--color-text);
-    background: var(--color-bg);
-  }
-
-  .regenerate-hint {
-    font-size: 0.6875rem;
-    color: var(--color-border-darker);
-    margin: 0;
-  }
-
-  /* Invite Modal */
-  .invite-content {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
   /* Transfer Modal */
   .transfer-content {
     display: flex;
@@ -842,122 +800,6 @@
     text-align: center;
     margin: 0;
     padding: 0.5rem 0 0;
-  }
-
-  /* Members Modal */
-  .members-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .members-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .members-group-title {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-border-darker);
-    margin: 0 0 0.25rem;
-  }
-
-  .member-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem;
-    margin: 0 -0.5rem;
-    border-radius: 0.5rem;
-  }
-
-  .member-item:hover {
-    background: var(--color-bg);
-  }
-
-  .member-avatar {
-    width: 2.25rem;
-    height: 2.25rem;
-    margin: 0;
-    flex-shrink: 0;
-  }
-
-  .member-avatar img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-
-  .member-info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .member-name {
-    font-weight: 500;
-    font-size: 0.9375rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .member-badge {
-    font-size: 0.625rem;
-    font-weight: 500;
-    padding: 0.125rem 0.375rem;
-    background: var(--color-selected);
-    color: var(--color-selected-dark);
-    border-radius: 0.25rem;
-  }
-
-  .member-actions {
-    display: flex;
-    gap: 0.25rem;
-    opacity: 0;
-    transition: opacity 150ms ease;
-  }
-
-  .member-item:hover .member-actions {
-    opacity: 1;
-  }
-
-  .member-action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    padding: 0;
-    border: none;
-    border-radius: 0.375rem;
-    background: transparent;
-    cursor: pointer;
-    transition: background-color 150ms ease;
-  }
-
-  .member-action-btn:hover {
-    background: var(--color-border);
-  }
-
-  .member-action-btn--danger:hover {
-    background: oklch(var(--lch-red) / 0.15);
-  }
-
-  .member-action-btn--danger img {
-    filter: none;
-    opacity: 0.6;
-  }
-
-  .member-action-btn--danger:hover img {
-    opacity: 1;
   }
 
   /* Notifications Modal */

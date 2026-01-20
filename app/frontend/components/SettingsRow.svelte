@@ -10,8 +10,8 @@
     children, // For right-side content like switches, badges
   } = $props();
 
-  const isInteractive = href || onclick;
-  const Tag = href ? "a" : "button";
+  let isInteractive = $derived(href || onclick);
+  let Tag = $derived(href ? "a" : "button");
 </script>
 
 {#if isInteractive}
@@ -20,6 +20,7 @@
     class="settings-row"
     class:settings-row--danger={danger}
     class:settings-row--disabled={disabled}
+    role={!href ? "button" : undefined}
     {href}
     onclick={onclick}
     type={!href ? "button" : undefined}
@@ -115,10 +116,6 @@
   .settings-row--disabled {
     opacity: 0.5;
     cursor: not-allowed;
-  }
-
-  .settings-row + .settings-row {
-    margin-top: 0.375rem;
   }
 
   .settings-row__icon {
