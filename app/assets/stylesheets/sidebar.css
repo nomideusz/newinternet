@@ -322,3 +322,17 @@
     visibility: hidden;
   }
 }
+
+/* Sidebar tools (avatar + settings) */
+.sidebar__tools {
+  background: linear-gradient(to top, var(--color-bg) 50%, transparent);
+  inset: auto 0 0 0;
+  padding: var(--block-space) var(--sidebar-inline-space);
+  position: absolute;
+  z-index: 4;
+}
+
+.sidebar__tool {
+  --btn-border-color: transparent;
+  --btn-bg: transparent;
+}
