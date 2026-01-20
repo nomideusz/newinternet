@@ -469,27 +469,6 @@
   </div>
 </Modal>
 
-<!-- Delete Confirmation Modal -->
-<Modal
-  open={!!deleteConfirmUser}
-  title="Remove member?"
-  size="small"
-  onclose={() => deleteConfirmUser = null}
->
-  <p class="confirm-text">
-    Are you sure you want to remove <strong>{deleteConfirmUser?.name}</strong> from {account?.name}? This action cannot be undone.
-  </p>
-  
-  {#snippet footer()}
-    <Button variant="secondary" onclick={() => deleteConfirmUser = null}>
-      Cancel
-    </Button>
-    <Button variant="danger" onclick={confirmDeleteUser}>
-      Remove
-    </Button>
-  {/snippet}
-</Modal>
-
 <style>
   .settings-page {
     display: flex;
