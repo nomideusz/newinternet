@@ -8,11 +8,11 @@
   }
 
   function closeSidebarOnMobile() {
-    // Close sidebar on screens under 100ch
+    // Hide sidebar on mobile when entering a room
     if (window.matchMedia('(max-width: 100ch)').matches) {
       const sidebar = document.getElementById("sidebar")
       if (sidebar) {
-        sidebar.classList.remove("open")
+        sidebar.classList.add("room-open")
       }
     }
   }

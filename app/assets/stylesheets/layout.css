@@ -89,13 +89,15 @@ body {
     @media (max-width: 100ch) {
       inset: 0;
       position: fixed;
-      transform: translate(100%);
+      /* Mobile: sidebar visible by default */
+      transform: translate(0);
     }
   }
 
-  &.open {
+  /* Mobile: hide sidebar when viewing a room */
+  &.room-open {
     @media (max-width: 100ch) {
-      transform: translate(0);
+      transform: translate(100%);
     }
   }
 }

@@ -49,18 +49,25 @@
         if (window.innerWidth <= 100 * parseFloat(getComputedStyle(document.documentElement).fontSize.replace('px', '')) / 16 * 16) {
             const sidebar = document.getElementById("sidebar");
             if (sidebar) {
-                sidebar.classList.remove("open");
+                sidebar.classList.add("room-open");
             }
         }
     }
 
+    function openSidebarOnMobile() {
+        const sidebar = document.getElementById("sidebar");
+        if (sidebar) {
+            sidebar.classList.remove("room-open");
+        }
+    }
+
     function navigateToNewDirect() {
-        closeSidebarOnMobile();
+        openSidebarOnMobile(); // Keep sidebar visible for new direct
         router.visit("/rooms/directs/new");
     }
 
     function navigateToNewRoom() {
-        closeSidebarOnMobile();
+        openSidebarOnMobile(); // Keep sidebar visible for new room
         router.visit("/rooms/opens/new");
     }
 
@@ -83,7 +90,7 @@
     function toggleSidebar() {
         const sidebar = document.getElementById("sidebar");
         if (sidebar) {
-            sidebar.classList.toggle("open");
+            sidebar.classList.toggle("room-open");
         }
     }
 </script>

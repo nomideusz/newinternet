@@ -34,7 +34,8 @@
     background-color 300ms ease;
   z-index: 5;
 
-  #sidebar:where(:not(.open):has(.unread)) & {
+  /* Show unread badge when sidebar is hidden and has unread messages */
+  #sidebar:where(.room-open:has(.unread)) & {
     &::after {
       --size: 1em;
 
@@ -56,21 +57,27 @@
     inset-block-start: var(--block-space);
   }
 
-  .open & {
+  /* Mobile: toggle is visible inside sidebar by default */
+  @media (max-width: 100ch) {
     inset-block-start: var(--block-space);
+    inset-inline-start: var(--sidebar-inline-space);
 
-    @media (max-width: 100ch) {
-      inset-inline-start: var(--sidebar-inline-space);
+    & img {
+      filter: invert(0);
+    }
 
+    @media (prefers-color-scheme: dark) {
       & img {
-        filter: invert(0);
+        filter: invert(100%);
       }
+    }
+  }
 
-      @media (prefers-color-scheme: dark) {
-        & img {
-          filter: invert(100%);
-        }
-      }
+  /* When viewing a room, position toggle outside to bring back sidebar */
+  .room-open & {
+    @media (max-width: 100ch) {
+      inset-block-start: var(--block-space-half);
+      inset-inline-start: calc((var(--btn-size) + max(var(--inline-space), 1vw)) * -1);
     }
   }
 }
@@ -94,11 +101,19 @@
   position: sticky;
   z-index: 3;
 
-  .open & {
+  /* Mobile: add padding for toggle button when sidebar is visible */
+  @media (max-width: 100ch) {
+    -webkit-mask-image: linear-gradient(to left, oklch(0% 0 0 / 1) 85%, oklch(0% 0 0 / 0) 99%);
+    mask-image: linear-gradient(to left, oklch(0% 0 0 / 1) 85%, oklch(0% 0 0 / 0) 99%);
+    padding-inline-start: calc(var(--btn-size) + var(--sidebar-inline-space) + (var(--column-gap) * 2.5));
+  }
+
+  /* When room is open (sidebar hidden), use normal padding */
+  .room-open & {
     @media (max-width: 100ch) {
-      -webkit-mask-image: linear-gradient(to left, oklch(0% 0 0 / 1) 85%, oklch(0% 0 0 / 0) 99%);
-      mask-image: linear-gradient(to left, oklch(0% 0 0 / 1) 85%, oklch(0% 0 0 / 0) 99%);
-      padding-inline-start: calc(var(--btn-size) + var(--sidebar-inline-space) + (var(--column-gap) * 2.5));
+      -webkit-mask-image: none;
+      mask-image: none;
+      padding-inline-start: var(--sidebar-inline-space);
     }
   }
 

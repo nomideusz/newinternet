@@ -9,8 +9,10 @@ export const sidebarManager = {
   /**
    * Mount the sidebar if not already mounted or if user changed
    * @param {Object} props - Sidebar props
+   * @param {Object} options - Mount options
+   * @param {boolean} options.isRoomPage - Whether this is a room page (affects mobile visibility)
    */
-  mount(props) {
+  mount(props, options = {}) {
     const sidebarEl = document.getElementById("sidebar");
 
     if (!sidebarEl) {
@@ -18,6 +20,15 @@ export const sidebarManager = {
     }
 
     const newUserId = props.currentUser?.id;
+
+    // On mobile, set room-open class based on page type
+    if (window.matchMedia('(max-width: 100ch)').matches) {
+      if (options.isRoomPage) {
+        sidebarEl.classList.add("room-open");
+      } else {
+        sidebarEl.classList.remove("room-open");
+      }
+    }
 
     // Skip if already mounted for the same user
     if (sidebarInstance && mountedUserId === newUserId) {

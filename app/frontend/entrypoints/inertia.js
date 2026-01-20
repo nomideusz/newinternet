@@ -61,9 +61,15 @@ function mountSidebarIfNeeded(pageName, pageProps) {
   const props = getSidebarProps(pageProps);
   const userId = props.currentUser?.id;
 
+  // Determine if this is a room page (where the chat should be visible on mobile)
+  const isRoomPage = pageName === "Rooms/Show";
+
   // Only mount if needed (not already mounted for this user)
   if (sidebarManager.needsMount(userId)) {
-    sidebarManager.mount(props);
+    sidebarManager.mount(props, { isRoomPage });
+  } else {
+    // Even if already mounted, we need to update the room-open state on mobile
+    sidebarManager.mount(props, { isRoomPage });
   }
 }
 
