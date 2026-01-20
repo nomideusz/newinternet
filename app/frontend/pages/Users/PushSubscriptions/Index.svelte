@@ -18,7 +18,7 @@
 
   onMount(() => {
     // Mount nav
-    const navEl = document.getElementById("nav-content");
+    const navEl = document.getElementById("nav");
     if (navEl) {
       navEl.innerHTML = `
         <div class="flex-item-justify-start">

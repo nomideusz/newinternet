@@ -41,8 +41,8 @@
       store.connect(room.id);
     }
     
-    // Mount nav into the #nav-content element
-    const navEl = document.getElementById("nav-content");
+    // Mount nav into the #nav element
+    const navEl = document.getElementById("nav");
     if (navEl) {
       navEl.innerHTML = "";
       navInstance = mount(RoomNav, {
