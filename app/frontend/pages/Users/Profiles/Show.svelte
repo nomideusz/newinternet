@@ -1,6 +1,7 @@
 <script>
   import { onMount, onDestroy, mount, unmount, untrack } from "svelte";
   import { router } from "@inertiajs/svelte";
+  import { sidebarManager } from "../../../stores/sidebarManager.svelte.js";
   import ProfileNav from "../../../components/ProfileNav.svelte";
   import Modal from "../../../components/Modal.svelte";
   import ModalSection from "../../../components/ModalSection.svelte";
@@ -33,6 +34,15 @@
   let navInstance = null;
 
   onMount(() => {
+    // Mount sidebar
+    if (sidebar && Object.keys(sidebar).length > 0) {
+      sidebarManager.mount({
+        ...sidebar,
+        currentUser,
+      });
+    }
+
+    // Mount nav
     const navEl = document.getElementById("nav");
     if (navEl) {
       navEl.innerHTML = "";
