@@ -9,7 +9,7 @@
   pointer-events: none;
   position: fixed;
   row-gap: var(--block-space);
-  z-index: 2;
+  z-index: 4;
 
   &:has(.room--current) {
     padding-inline: var(--inline-space);
@@ -33,6 +33,7 @@
 
   .sidebar & {
     @media (max-width: 100ch) {
+      inset-inline-end: 0;
       padding-block: var(--block-space-half);
 
       &::before {
