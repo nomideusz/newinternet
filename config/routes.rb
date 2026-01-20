@@ -22,6 +22,7 @@ Rails.application.routes.draw do
   resource :account do
     scope module: "accounts" do
       resources :users
+      resource :invite, only: :show
 
       resources :bots do
         scope module: "bots" do

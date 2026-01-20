@@ -10,16 +10,11 @@
 
   import iconArrowLeft from "images/arrow-left.svg";
   import iconCamera from "images/camera.svg";
-  import iconMinus from "images/minus.svg";
-  import iconCheck from "images/check.svg";
-  import iconCrown from "images/crown.svg";
   import iconPersonAdd from "images/person-add.svg";
   import iconQrCode from "images/qr-code.svg";
   import iconCopyPaste from "images/copy-paste.svg";
   import iconShare from "images/share.svg";
-  import iconRefresh from "images/refresh.svg";
   import iconPerson from "images/person.svg";
-  import iconTrash from "images/trash.svg";
   import iconLock from "images/lock.svg";
   import iconOffice from "images/office.svg";
   import iconMessages from "images/messages.svg";
@@ -88,12 +83,9 @@
   let logoPreview = $state(null);
   let restrictRoomCreation = $state(initialRestrictRoomCreation);
 
-  // Modal state
-  let showMembersModal = $state(false);
-  let showInviteModal = $state(false);
+  // Modal state (only for notifications and transfer which are smaller actions)
   let showNotificationsModal = $state(false);
   let showTransferModal = $state(false);
-  let deleteConfirmUser = $state(null);
 
   // === Profile handlers ===
   function handleAvatarChange(event) {
@@ -171,26 +163,6 @@
       { account: { settings: { restrict_room_creation_to_administrators: checked } } },
       { preserveScroll: true }
     );
-  }
-
-  function handleUserRoleToggle(user) {
-    const newRole = user.role === "administrator" ? "member" : "administrator";
-    router.patch(`/account/users/${user.id}`, { user: { role: newRole } }, { preserveScroll: true });
-  }
-
-  function handleDeleteUser(user) {
-    deleteConfirmUser = user;
-  }
-
-  function confirmDeleteUser() {
-    if (deleteConfirmUser) {
-      router.delete(`/account/users/${deleteConfirmUser.id}`, { preserveScroll: true });
-      deleteConfirmUser = null;
-    }
-  }
-
-  function handleRegenerateJoinCode() {
-    router.post("/account/join_code", {}, { preserveScroll: true });
   }
 
   function handleInvolvementChange(roomId, newInvolvement) {
@@ -335,14 +307,14 @@
           label="Members"
           description="{administrators.length} admins, {members.length} members"
           icon={iconPerson}
-          onclick={() => showMembersModal = true}
+          href="/account/users"
         />
         
         <SettingsRow
           label="Invite people"
           description="Share a link to invite new members"
           icon={iconPersonAdd}
-          onclick={() => showInviteModal = true}
+          href="/account/invite"
         />
 
         {#if canAdminister}
@@ -350,7 +322,7 @@
             label="Organization settings"
             description="Change name and logo"
             icon={iconOffice}
-            onclick={() => document.getElementById('org-settings-section')?.scrollIntoView({ behavior: 'smooth' })}
+            onclick={() => document.getElementById('org-settings-section')?.scrollIntoView({ behavior: 'smooth' })}}
           />
         {/if}
       </ModalSection>
@@ -403,136 +375,6 @@
     {/if}
   </div>
 </div>
-
-<!-- Members Modal -->
-<Modal
-  bind:open={showMembersModal}
-  title="Members"
-  subtitle="{users.length} people in {account?.name}"
-  size="default"
->
-  <div class="members-list">
-    {#if administrators.length > 0}
-      <div class="members-group">
-        <h4 class="members-group-title">Administrators</h4>
-        {#each administrators as user (user.id)}
-          <div class="member-item">
-            <figure class="member-avatar">
-              <img src={user.avatar_url} alt="" />
-            </figure>
-            <div class="member-info">
-              <span class="member-name">{user.name}</span>
-              {#if user.id === currentUser?.id}
-                <span class="member-badge">You</span>
-              {/if}
-            </div>
-            {#if canAdminister && user.id !== currentUser?.id && !user.is_bot}
-              <div class="member-actions">
-                <button
-                  type="button"
-                  class="member-action-btn"
-                  onclick={() => handleUserRoleToggle(user)}
-                  title="Remove admin"
-                >
-                  <img src={iconCrown} alt="" width="16" height="16" class="colorize--black" />
-                </button>
-                <button
-                  type="button"
-                  class="member-action-btn member-action-btn--danger"
-                  onclick={() => handleDeleteUser(user)}
-                  title="Remove from organization"
-                >
-                  <img src={iconTrash} alt="" width="16" height="16" />
-                </button>
-              </div>
-            {/if}
-          </div>
-        {/each}
-      </div>
-    {/if}
-
-    {#if members.length > 0}
-      <div class="members-group">
-        <h4 class="members-group-title">Members</h4>
-        {#each members as user (user.id)}
-          <div class="member-item">
-            <figure class="member-avatar">
-              <img src={user.avatar_url} alt="" />
-            </figure>
-            <div class="member-info">
-              <span class="member-name">{user.name}</span>
-              {#if user.id === currentUser?.id}
-                <span class="member-badge">You</span>
-              {/if}
-            </div>
-            {#if canAdminister && !user.is_bot}
-              <div class="member-actions">
-                <button
-                  type="button"
-                  class="member-action-btn"
-                  onclick={() => handleUserRoleToggle(user)}
-                  title="Make admin"
-                >
-                  <img src={iconCrown} alt="" width="16" height="16" class="colorize--black" style="opacity: 0.3" />
-                </button>
-                <button
-                  type="button"
-                  class="member-action-btn member-action-btn--danger"
-                  onclick={() => handleDeleteUser(user)}
-                  title="Remove from organization"
-                >
-                  <img src={iconTrash} alt="" width="16" height="16" />
-                </button>
-              </div>
-            {/if}
-          </div>
-        {/each}
-      </div>
-    {/if}
-  </div>
-</Modal>
-
-<!-- Invite Modal -->
-<Modal
-  bind:open={showInviteModal}
-  title="Invite people"
-  subtitle="Share this link to invite new members"
-  size="small"
->
-  <div class="invite-content">
-    <div class="url-box">
-      <input
-        type="text"
-        value={joinUrl}
-        readonly
-        class="url-input"
-        onclick={(e) => e.target.select()}
-      />
-    </div>
-    
-    <div class="action-buttons">
-      <Button variant="secondary" onclick={() => openQrCode(joinUrl)} icon={iconQrCode}>
-        QR Code
-      </Button>
-      <Button variant="secondary" onclick={() => copyToClipboard(joinUrl)} icon={iconCopyPaste}>
-        Copy
-      </Button>
-      <Button variant="secondary" onclick={() => shareUrl(joinUrl, "Join link", "Join me on New Internet")} icon={iconShare}>
-        Share
-      </Button>
-    </div>
-
-    {#if canAdminister}
-      <div class="regenerate-section">
-        <button type="button" class="regenerate-btn" onclick={handleRegenerateJoinCode}>
-          <img src={iconRefresh} alt="" width="14" height="14" class="colorize--black" />
-          Generate new link
-        </button>
-        <p class="regenerate-hint">This will invalidate the current link</p>
-      </div>
-    {/if}
-  </div>
-</Modal>
 
 <!-- Notifications Modal -->
 <Modal
