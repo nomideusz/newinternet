@@ -83,7 +83,7 @@
     margin: 0;
     border: none;
     border-radius: 0.5rem;
-    background: var(--color-message-bg);
+    background: var(--color-bg);
     color: var(--color-text);
     text-decoration: none;
     text-align: left;
@@ -127,7 +127,7 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    background: var(--color-bg);
+    background: var(--color-border);
     border-radius: 0.375rem;
     flex-shrink: 0;
   }

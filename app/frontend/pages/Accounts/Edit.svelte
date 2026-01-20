@@ -418,11 +418,26 @@
     justify-content: center;
     padding: 2rem 1rem;
     min-height: 100%;
+    background: var(--color-bg);
   }
 
   .settings-container {
     width: 100%;
     max-width: 32rem;
+    background: var(--color-message-bg);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px oklch(var(--lch-always-black) / 0.1);
+  }
+
+  @media (max-width: 640px) {
+    .settings-page {
+      padding: 1rem 0.5rem;
+    }
+    .settings-container {
+      padding: 1rem;
+      border-radius: 0.75rem;
+    }
   }
 
   /* Header */
