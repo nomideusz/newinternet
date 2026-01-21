@@ -14,7 +14,6 @@ class Rooms::OpensController < RoomsController
   end
 
   def new
-    load_sidebar_data
     @room = Rooms::Open.new(name: DEFAULT_ROOM_NAME)
     @users = User.active.ordered
 
@@ -23,14 +22,7 @@ class Rooms::OpensController < RoomsController
       room: { name: @room.name },
       users: UserPresenter.collection(@users, view: :minimal),
       typeChangePath: new_rooms_closed_path,
-      cancelUrl: user_sidebar_path,
-      currentUser: UserPresenter.new(Current.user, view: :minimal).as_json,
-      sidebar: {
-        directMemberships: MembershipPresenter.collection(@direct_memberships, view: :sidebar),
-        otherMemberships: MembershipPresenter.collection(@other_memberships, view: :sidebar),
-        directPlaceholderUsers: UserPresenter.collection(@direct_placeholder_users, view: :minimal),
-        canCreateRooms: Current.user.administrator? || !Current.account.settings.restrict_room_creation_to_administrators?
-      }
+      cancelUrl: user_sidebar_path
     }
   end
 
@@ -42,7 +34,6 @@ class Rooms::OpensController < RoomsController
   end
 
   def edit
-    load_sidebar_data
     @users = User.active.ordered
 
     render inertia: "Rooms/Opens/Edit", props: {
@@ -53,14 +44,7 @@ class Rooms::OpensController < RoomsController
       isOpenRoom: @room.is_a?(Rooms::Open),
       typeChangePath: edit_rooms_closed_path(@room),
       cancelUrl: room_path(@room),
-      currentUser: UserPresenter.new(Current.user, view: :minimal).as_json,
-      canAdminister: Current.user.can_administer?(@room),
-      sidebar: {
-        directMemberships: MembershipPresenter.collection(@direct_memberships, view: :sidebar),
-        otherMemberships: MembershipPresenter.collection(@other_memberships, view: :sidebar),
-        directPlaceholderUsers: UserPresenter.collection(@direct_placeholder_users, view: :minimal),
-        canCreateRooms: Current.user.administrator? || !Current.account.settings.restrict_room_creation_to_administrators?
-      }
+      canAdminister: Current.user.can_administer?(@room)
     }
   end
 

@@ -1,6 +1,12 @@
 <script>
-  import { onMount, onDestroy, mount, unmount, untrack } from "svelte";
-  import { router } from "@inertiajs/svelte";
+  import {
+    onMount,
+    onDestroy,
+    mount,
+    unmount,
+    untrack,
+    getContext,
+  } from "svelte";
   import ProfileNav from "../../../components/ProfileNav.svelte";
 
   import iconCamera from "images/camera.svg";
@@ -15,13 +21,18 @@
   import iconTransfer from "images/transfer.svg";
   import iconMobilePhone from "images/mobile-phone.svg";
 
+  // Props passed by InertiaX Frame
   let {
+    router,
     page,
-    currentUser,
+    profile,
     memberships = [],
     transferUrl,
     sidebar = {},
   } = $props();
+
+  const ctx = getContext("inertia");
+  const isInModal = ctx?.frame === "modal";
 
   // Track mounted nav instance
   let navInstance = null;
@@ -29,11 +40,11 @@
   onMount(() => {
     // Mount nav into the #nav element
     const navEl = document.getElementById("nav");
-    if (navEl) {
+    if (navEl && !isInModal) {
       navEl.innerHTML = "";
       navInstance = mount(ProfileNav, {
         target: navEl,
-        props: { currentUser },
+        props: {},
       });
     }
   });
@@ -50,7 +61,7 @@
   });
 
   // Form state - initialized once from props (intentionally capturing initial value)
-  const initialBio = untrack(() => currentUser?.bio ?? "");
+  const initialBio = untrack(() => profile?.bio ?? "");
   let bio = $state(initialBio);
   let isSubmitting = $state(false);
   let avatarPreview = $state(null);
@@ -58,10 +69,10 @@
 
   // Split memberships
   let directMemberships = $derived(
-    memberships.filter((m) => m.room.type === "direct")
+    memberships.filter((m) => m.room.type === "direct"),
   );
   let sharedMemberships = $derived(
-    memberships.filter((m) => m.room.type !== "direct")
+    memberships.filter((m) => m.room.type !== "direct"),
   );
 
   function handleAvatarChange(event) {
@@ -89,7 +100,7 @@
   }
 
   function handleDeleteAvatar() {
-    router.delete(`/users/${currentUser.id}/avatar`, {
+    router.delete(`/users/${profile.id}/avatar`, {
       preserveScroll: true,
     });
   }
@@ -106,7 +117,7 @@
         onFinish: () => {
           isSubmitting = false;
         },
-      }
+      },
     );
   }
 
@@ -114,7 +125,7 @@
     router.patch(
       `/rooms/${roomId}/involvement`,
       { involvement: newInvolvement },
-      { preserveScroll: true }
+      { preserveScroll: true },
     );
   }
 
@@ -135,25 +146,56 @@
     window.open(`/qr_code/${encodedUrl}`, "_blank", "width=400,height=400");
   }
 
-  const involvementOptions = [
-    { value: "everything", label: "Everything" },
-    { value: "mentions", label: "Mentions" },
-    { value: "nothing", label: "Nothing" },
-  ];
+  import iconBellEverything from "images/notification-bell-everything.svg";
+  import iconBellMentions from "images/notification-bell-mentions.svg";
+  import iconBellNothing from "images/notification-bell-nothing.svg";
+
+  // ... (keeping existing logic)
+
+  const involvementConfig = {
+    everything: {
+      next: "mentions",
+      label: "Everything",
+      icon: iconBellEverything,
+    },
+    mentions: {
+      next: "nothing",
+      label: "Mentions",
+      icon: iconBellMentions,
+    },
+    nothing: {
+      next: "everything",
+      label: "Nothing",
+      icon: iconBellNothing,
+    },
+  };
+
+  function handleInvolvementToggle(membership) {
+    const current = membership.involvement;
+    const next = involvementConfig[current]?.next || "everything";
+    handleInvolvementChange(membership.room_id, next);
+  }
 </script>
 
 <svelte:head>
-  <title>{currentUser?.name} - Profile</title>
+  <title>{profile?.name} - Profile</title>
 </svelte:head>
 
 <section
-  class="panel flex flex-column gap"
-  style="view-transition-name: avatar-{currentUser?.id}"
+  class="flex flex-column gap"
+  style="view-transition-name: avatar-{profile?.id}"
 >
   <!-- Avatar section -->
   <div class="align-center center avatar__form gap">
     <label class="btn input--file">
-      <img src={iconCamera} aria-hidden="true" width="20" height="20" alt="" />
+      <img
+        src={iconCamera}
+        aria-hidden="true"
+        width="20"
+        height="20"
+        alt=""
+        class="adaptive-icon"
+      />
       <input
         type="file"
         accept="image/*"
@@ -167,7 +209,7 @@
 
     <label class="btn avatar input--file txt-xx-large">
       <img
-        src={avatarPreview || currentUser?.avatar_url}
+        src={avatarPreview || profile?.avatar_url}
         aria-hidden="true"
         width="300"
         height="300"
@@ -183,13 +225,20 @@
       <span class="for-screen-reader">Avatar</span>
     </label>
 
-    {#if currentUser?.has_avatar}
+    {#if profile?.has_avatar}
       <button
         type="button"
         class="btn btn--negative txt-small avatar__delete-btn"
         onclick={handleDeleteAvatar}
       >
-        <img src={iconMinus} aria-hidden="true" width="20" height="20" alt="" />
+        <img
+          src={iconMinus}
+          aria-hidden="true"
+          width="20"
+          height="20"
+          alt=""
+          class="adaptive-icon"
+        />
         <span class="for-screen-reader">Delete avatar</span>
       </button>
     {/if}
@@ -203,7 +252,7 @@
         class="flex align-center gap flex-item-grow input input--actor input--disabled"
       >
         <span class="input txt-large flex align-center"
-          >{currentUser?.username}</span
+          >{profile?.username}</span
         >
         <img
           src={iconPerson}
@@ -211,7 +260,7 @@
           width="24"
           height="24"
           alt=""
-          class="colorize--black"
+          class="adaptive-icon"
         />
       </div>
     </div>
@@ -232,7 +281,7 @@
           width="24"
           height="24"
           alt=""
-          class="colorize--black"
+          class="adaptive-icon"
         />
       </label>
     </div>
@@ -242,7 +291,14 @@
       class="btn btn--reversed center"
       disabled={isSubmitting}
     >
-      <img src={iconCheck} aria-hidden="true" width="20" height="20" alt="" />
+      <img
+        src={iconCheck}
+        aria-hidden="true"
+        width="20"
+        height="20"
+        alt=""
+        class="reversed-icon"
+      />
       <span>Save changes</span>
     </button>
   </form>
@@ -250,9 +306,11 @@
   <!-- Memberships -->
   {#if memberships.length > 0}
     <div class="margin-block pad-inline pad-block fill-shade border-radius">
-      <menu class="flex flex-column gap margin-none pad">
+      <menu class="flex flex-column gap margin-none pad scrollable-list">
         {#each sharedMemberships as membership (membership.id)}
-          <li class="flex align-center gap margin-none min-width membership-item">
+          <li
+            class="flex align-center gap margin-none min-width membership-item"
+          >
             <a
               href="/rooms/{membership.room_id}"
               class="overflow-ellipsis fill-shade txt-primary txt-undecorated"
@@ -264,16 +322,22 @@
               <strong>{membership.room.display_name}</strong>
             </a>
             <hr class="separator" aria-hidden="true" />
-            <select
-              class="btn txt-small"
-              value={membership.involvement}
-              onchange={(e) =>
-                handleInvolvementChange(membership.room_id, e.target.value)}
+            <button
+              type="button"
+              class="btn btn-icon txt-small flex-item-no-shrink"
+              onclick={() => handleInvolvementToggle(membership)}
+              title="Notify me about: {involvementConfig[membership.involvement]
+                ?.label}"
+              aria-label="Change notification settings"
             >
-              {#each involvementOptions as opt}
-                <option value={opt.value}>{opt.label}</option>
-              {/each}
-            </select>
+              <img
+                src={involvementConfig[membership.involvement]?.icon}
+                width="24"
+                height="24"
+                alt={involvementConfig[membership.involvement]?.label}
+                class="adaptive-icon"
+              />
+            </button>
           </li>
         {/each}
 
@@ -282,7 +346,9 @@
         {/if}
 
         {#each directMemberships as membership (membership.id)}
-          <li class="flex align-center gap margin-none min-width membership-item">
+          <li
+            class="flex align-center gap margin-none min-width membership-item"
+          >
             <a
               href="/rooms/{membership.room_id}"
               class="overflow-ellipsis fill-shade txt-primary txt-undecorated"
@@ -294,16 +360,22 @@
               <strong>{membership.room.display_name}</strong>
             </a>
             <hr class="separator" aria-hidden="true" />
-            <select
-              class="btn txt-small"
-              value={membership.involvement}
-              onchange={(e) =>
-                handleInvolvementChange(membership.room_id, e.target.value)}
+            <button
+              type="button"
+              class="btn txt-small flex-item-no-shrink"
+              onclick={() => handleInvolvementToggle(membership)}
+              title="Notify me about: {involvementConfig[membership.involvement]
+                ?.label}"
+              aria-label="Change notification settings"
             >
-              {#each involvementOptions as opt}
-                <option value={opt.value}>{opt.label}</option>
-              {/each}
-            </select>
+              <img
+                src={involvementConfig[membership.involvement]?.icon}
+                width="24"
+                height="24"
+                alt={involvementConfig[membership.involvement]?.label}
+                class="adaptive-icon"
+              />
+            </button>
           </li>
         {/each}
       </menu>
@@ -320,7 +392,7 @@
           width="36"
           height="36"
           alt=""
-          class="colorize--black"
+          class="adaptive-icon"
         />
         <img
           src={iconTransfer}
@@ -328,7 +400,7 @@
           width="36"
           height="36"
           alt=""
-          class="colorize--black"
+          class="adaptive-icon"
         />
         <img
           src={iconMobilePhone}
@@ -336,7 +408,7 @@
           width="36"
           height="36"
           alt=""
-          class="colorize--black"
+          class="adaptive-icon"
         />
       </legend>
 
@@ -364,7 +436,7 @@
               width="20"
               height="20"
               alt=""
-              class="colorize--black"
+              class="adaptive-icon"
             />
             <span class="for-screen-reader">Show auto-login QR code</span>
           </button>
@@ -380,7 +452,7 @@
               width="20"
               height="20"
               alt=""
-              class="colorize--black"
+              class="adaptive-icon"
             />
             <span class="for-screen-reader">Copy auto-login link</span>
           </button>
@@ -392,7 +464,7 @@
               shareUrl(
                 transferUrl,
                 "Your sign-in link",
-                "This is your own private sign-in URL, DO NOT SHARE IT."
+                "This is your own private sign-in URL, DO NOT SHARE IT.",
               )}
           >
             <img
@@ -401,7 +473,7 @@
               width="20"
               height="20"
               alt=""
-              class="colorize--black"
+              class="adaptive-icon"
             />
             <span class="for-screen-reader">Share auto-login link</span>
           </button>
@@ -410,3 +482,37 @@
     </fieldset>
   {/if}
 </section>
+
+<style>
+  /* Adaptive icon color */
+  :global(:root[data-theme="dark"]) .adaptive-icon {
+    filter: invert(1) !important;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .adaptive-icon {
+      filter: invert(1) !important;
+    }
+  }
+
+  /* Ensure panel width constraint is removed if class remains elsewhere */
+  :global(.panel) {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .scrollable-list {
+    max-height: 30vh; /* Reduced from 40vh to ensure it fits better */
+    overflow-y: auto;
+    overscroll-behavior: contain; /* Prevent scrolling parent */
+  }
+
+  .btn-icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border-radius: 50%;
+  }
+</style>

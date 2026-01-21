@@ -1,6 +1,12 @@
 <script>
-  import { onMount, onDestroy, mount, unmount, untrack } from "svelte";
-  import { router } from "@inertiajs/svelte";
+  import {
+    onMount,
+    onDestroy,
+    mount,
+    unmount,
+    untrack,
+    getContext,
+  } from "svelte";
   import AccountNav from "../../components/AccountNav.svelte";
 
   import iconCamera from "images/camera.svg";
@@ -14,7 +20,9 @@
   import iconRefresh from "images/refresh.svg";
   import iconPencil from "images/pencil.svg";
 
+  // Props passed by InertiaX Frame
   let {
+    router,
     page,
     account,
     users = [],
@@ -26,13 +34,16 @@
     sidebar = {},
   } = $props();
 
+  const ctx = getContext("inertia");
+  const isInModal = ctx?.frame === "modal";
+
   // Track mounted nav instance
   let navInstance = null;
 
   onMount(() => {
     // Mount nav into the #nav element
     const navEl = document.getElementById("nav");
-    if (navEl) {
+    if (navEl && !isInModal) {
       navEl.innerHTML = "";
       navInstance = mount(AccountNav, {
         target: navEl,
@@ -53,13 +64,15 @@
   });
 
   // Split users into admins and members
-  let administrators = $derived(users.filter((u) => u.role === "administrator"));
+  let administrators = $derived(
+    users.filter((u) => u.role === "administrator"),
+  );
   let members = $derived(users.filter((u) => u.role !== "administrator"));
 
   // Form state - initialized from props (intentionally capturing initial values)
   const initialAccountName = untrack(() => account?.name ?? "");
   const initialRestrictRoomCreation = untrack(
-    () => account?.settings?.restrict_room_creation_to_administrators ?? false
+    () => account?.settings?.restrict_room_creation_to_administrators ?? false,
   );
   let accountName = $state(initialAccountName);
   let isSubmitting = $state(false);
@@ -108,7 +121,7 @@
         onFinish: () => {
           isSubmitting = false;
         },
-      }
+      },
     );
   }
 
@@ -125,7 +138,7 @@
           },
         },
       },
-      { preserveScroll: true }
+      { preserveScroll: true },
     );
   }
 
@@ -134,14 +147,14 @@
     router.patch(
       `/account/users/${user.id}`,
       { user: { role: newRole } },
-      { preserveScroll: true }
+      { preserveScroll: true },
     );
   }
 
   function handleDeleteUser(user) {
     if (
       confirm(
-        "Are you sure you want to permanently remove this person from the account? This can't be undone."
+        "Are you sure you want to permanently remove this person from the account? This can't be undone.",
       )
     ) {
       router.delete(`/account/users/${user.id}`, {
@@ -172,21 +185,77 @@
   }
 
   function navigateToProfile() {
-    router.visit("/profile");
+    router.visit("/users/me/profile");
   }
 </script>
 
 <svelte:head>
+  <style>
+    /* Adaptive icon color */
+    :global(:root[data-theme="dark"]) .adaptive-icon {
+      filter: invert(1) !important;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .adaptive-icon {
+        filter: invert(1) !important;
+      }
+    }
+
+    /* Ensure panel width constraint is removed if class remains elsewhere */
+    :global(.panel) {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .margin-block-end {
+      margin-block-end: 1.5rem;
+    }
+
+    .justify-center {
+      justify-content: center;
+    }
+
+    /* Admin toggle active state */
+    /* Admin toggle active state */
+    .btn--active {
+      background-color: #000 !important;
+      color: #fff !important;
+    }
+
+    /* Light mode active: Icon is black originally, needs to be white (invert) */
+    .btn--active .adaptive-icon {
+      filter: invert(1) !important;
+    }
+
+    /* Dark mode active: BG becomes White (contrast), Text becomes Black */
+    :global(:root[data-theme="dark"]) .btn--active {
+      background-color: #fff !important;
+      color: #000 !important;
+    }
+
+    /* Dark mode active icon: Icon is originally black. 
+       - Root dark theme inverts it to White.
+       - But we are on a White BG now. So we need it Black.
+       - So filtering: invert(0) !important to reset the root inversion. 
+    */
+    :global(:root[data-theme="dark"]) .btn--active .adaptive-icon {
+      filter: invert(0) !important;
+    }
+  </style>
   <title>Account Settings</title>
 </svelte:head>
 
 <section
-  class="panel txt-align-center flex flex-column gap"
+  class="txt-align-center"
   style="view-transition-name: account-settings"
 >
   {#if canAdminister}
     <!-- Logo upload for admins -->
-    <div class="align-center center avatar__form gap">
+    <!-- Logo upload for admins -->
+    <div
+      class="flex align-center justify-center avatar__form gap margin-block-end"
+    >
       <label class="btn input--file">
         <img
           src={iconCamera}
@@ -242,7 +311,10 @@
     </div>
 
     <!-- Account name form -->
-    <form onsubmit={handleNameSubmit} class="flex flex-column gap">
+    <form
+      onsubmit={handleNameSubmit}
+      class="flex flex-column gap margin-block-end"
+    >
       <div class="flex align-center gap">
         <span class="btn btn--disabled">Name</span>
         <label class="flex align-center gap flex-item-grow">
@@ -273,13 +345,13 @@
 
     <!-- Room creation restriction toggle -->
     <div
-      class="margin-block-start pad-block pad-inline-double fill-shade border-radius"
+      class="margin-block-start pad-block pad-inline-double fill-shade border-radius margin-block-end"
     >
       <div class="flex align-center gap center">
         <div class="flex-item-grow flex align-center gap txt-align-start">
           <img
             src={iconCrown}
-            class="colorize--black"
+            class="adaptive-icon"
             aria-hidden="true"
             width="18"
             height="18"
@@ -345,7 +417,7 @@
             width="20"
             height="20"
             alt=""
-            class="colorize--black"
+            class="adaptive-icon"
           />
         </button>
 
@@ -361,7 +433,7 @@
             width="20"
             height="20"
             alt=""
-            class="colorize--black"
+            class="adaptive-icon"
           />
         </button>
 
@@ -372,7 +444,7 @@
             shareUrl(
               joinUrl,
               "Link to join New Internet",
-              "Hit this link to join me and start chatting."
+              "Hit this link to join me and start chatting.",
             )}
         >
           <span class="for-screen-reader">Share join link</span>
@@ -382,7 +454,7 @@
             width="20"
             height="20"
             alt=""
-            class="colorize--black"
+            class="adaptive-icon"
           />
         </button>
 
@@ -398,7 +470,7 @@
               width="20"
               height="20"
               alt=""
-              class="colorize--black"
+              class="adaptive-icon"
             />
             <span class="for-screen-reader">Regenerate join link</span>
           </button>
@@ -406,14 +478,29 @@
       </div>
     </div>
 
-    <hr class="margin-block separator full-width" style="--border-style: solid" />
+    <hr
+      class="margin-block separator full-width"
+      style="--border-style: solid"
+    />
 
     <!-- Users list -->
     <menu class="flex flex-column gap margin-none pad">
       {#each administrators as user (user.id)}
-        <li class="flex align-center gap margin-none" class:banned={user.status === "banned"}>
-          <figure class="avatar flex-item-no-shrink" style="--avatar-size: 3.75ch;">
-            <img src={user.avatar_url} loading="lazy" width="48" height="48" alt="" />
+        <li
+          class="flex align-center gap margin-none"
+          class:banned={user.status === "banned"}
+        >
+          <figure
+            class="avatar flex-item-no-shrink"
+            style="--avatar-size: 3.75ch;"
+          >
+            <img
+              src={user.avatar_url}
+              loading="lazy"
+              width="48"
+              height="48"
+              alt=""
+            />
           </figure>
           <div class="min-width">
             <div class="overflow-ellipsis fill-shade">
@@ -432,7 +519,9 @@
                 disabled={user.id === currentUser?.id}
               >
                 <span class="for-screen-reader"
-                  >Role: {user.role === "administrator" ? "Administrator" : "Member"}</span
+                  >Role: {user.role === "administrator"
+                    ? "Administrator"
+                    : "Member"}</span
                 >
                 <img
                   src={iconCrown}
@@ -486,9 +575,21 @@
       {/if}
 
       {#each members as user (user.id)}
-        <li class="flex align-center gap margin-none" class:banned={user.status === "banned"}>
-          <figure class="avatar flex-item-no-shrink" style="--avatar-size: 3.75ch;">
-            <img src={user.avatar_url} loading="lazy" width="48" height="48" alt="" />
+        <li
+          class="flex align-center gap margin-none"
+          class:banned={user.status === "banned"}
+        >
+          <figure
+            class="avatar flex-item-no-shrink"
+            style="--avatar-size: 3.75ch;"
+          >
+            <img
+              src={user.avatar_url}
+              loading="lazy"
+              width="48"
+              height="48"
+              alt=""
+            />
           </figure>
           <div class="min-width">
             <div class="overflow-ellipsis fill-shade">
@@ -506,7 +607,9 @@
                 onclick={() => handleUserRoleToggle(user)}
               >
                 <span class="for-screen-reader"
-                  >Role: {user.role === "administrator" ? "Administrator" : "Member"}</span
+                  >Role: {user.role === "administrator"
+                    ? "Administrator"
+                    : "Member"}</span
                 >
                 <img
                   src={iconCrown}

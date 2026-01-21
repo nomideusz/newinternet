@@ -1,4 +1,5 @@
 class Users::SidebarsController < ApplicationController
+  # Use inertia layout for Frame requests
   layout "inertia"
 
   DIRECT_PLACEHOLDERS = 20
@@ -11,12 +12,10 @@ class Users::SidebarsController < ApplicationController
     @direct_placeholder_users = find_direct_placeholder_users
 
     render inertia: "Users/Sidebars/Show", props: {
-      page: { title: "Sidebar", bodyClass: "sidebar" },
       directMemberships: MembershipPresenter.collection(@direct_memberships, view: :sidebar),
       otherMemberships: MembershipPresenter.collection(@other_memberships, view: :sidebar),
       directPlaceholderUsers: UserPresenter.collection(@direct_placeholder_users, view: :minimal),
-      canCreateRooms: Current.user.administrator? || !Current.account.settings.restrict_room_creation_to_administrators?,
-      currentUser: UserPresenter.new(Current.user, view: :minimal).as_json
+      canCreateRooms: Current.user.administrator? || !Current.account.settings.restrict_room_creation_to_administrators?
     }
   end
 

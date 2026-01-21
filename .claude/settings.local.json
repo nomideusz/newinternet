@@ -20,7 +20,9 @@
       "Bash(docker-compose down:*)",
       "Bash(docker compose:*)",
       "WebSearch",
-      "mcp__acp__Edit"
+      "mcp__acp__Edit",
+      "mcp__acp__Bash",
+      "mcp__acp__Write"
     ]
   }
 }

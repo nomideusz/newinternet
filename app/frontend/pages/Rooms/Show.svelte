@@ -6,14 +6,14 @@
   import TypingIndicator from "../../components/TypingIndicator.svelte";
   import { MessagesStore } from "../../stores/messages.svelte.js";
 
+  // Props passed by InertiaX Frame
   let {
-    page,
     room,
     messages = [],
-    currentUser,
     canAdminister = false,
     anchorMessageId = null,
     sidebar = {},
+    currentUser = null,
   } = $props();
 
   // Initialize store (currentUserId will be set in effect)
@@ -40,32 +40,50 @@
       connectedRoomId = room.id;
       store.connect(room.id);
     }
-    
-    // Mount nav into the #nav element
+  });
+
+  // Mount and update nav when room changes
+  $effect(() => {
+    const currentRoom = room;
+    const currentCanAdminister = canAdminister;
+
     const navEl = document.getElementById("nav");
     if (navEl) {
+      // Clean up previous instance
+      if (navInstance) {
+        try {
+          unmount(navInstance);
+        } catch (e) {
+          // Component may already be unmounted
+        }
+      }
       navEl.innerHTML = "";
       navInstance = mount(RoomNav, {
         target: navEl,
-        props: { room, canAdminister },
+        props: {
+          room: currentRoom,
+          canAdminister: currentCanAdminister,
+        },
       });
     }
+
+    return () => {
+      // Cleanup on effect re-run or destroy
+      if (navInstance) {
+        try {
+          unmount(navInstance);
+        } catch (e) {
+          // Component may already be unmounted
+        }
+        navInstance = null;
+      }
+    };
   });
 
   onDestroy(() => {
     // Disconnect from room
     store.disconnect();
     connectedRoomId = null;
-    
-    // Clean up nav component
-    if (navInstance) {
-      try {
-        unmount(navInstance);
-      } catch (e) {
-        // Component may already be unmounted
-      }
-      navInstance = null;
-    }
   });
 
   let showJumpToNewest = $state(false);

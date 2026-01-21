@@ -55,31 +55,15 @@
     <%# Load Vite + Svelte + Inertia %>
     <% if Rails.env.development? %>
       <script type="module" src="http://localhost:3036/@vite/client"></script>
-      <script type="module" src="http://localhost:3036/app/frontend/entrypoints/inertia.js"></script>
-    <% else %>
-      <%= vite_javascript_tag 'inertia', crossorigin: 'anonymous' %>
     <% end %>
+    <%= vite_javascript_tag 'inertia', crossorigin: 'anonymous' %>
   </head>
 
   <body class="<%= body_classes %>" data-controller="local-time lightbox">
     <a href="#main-content" class="skip-navigation btn">Skip to main content</a>
 
-    <nav id="nav">
-      <%# Nav content rendered by Svelte components %>
-    </nav>
-
-    <main id="main-content" data-turbo="false">
-      <%= yield %>
-    </main>
-
-    <aside id="sidebar" data-controller="toggle-class" data-toggle-class-toggle-class="open">
-      <%# Sidebar content rendered by Svelte components %>
-    </aside>
+    <%= yield %>
 
     <%= render "layouts/lightbox" %>
-
-    <a href="/" id="app-logo" aria-label="New Internet home page">
-      <%= image_tag "ni-logo.svg", alt: "New Internet" %>
-    </a>
   </body>
 </html>

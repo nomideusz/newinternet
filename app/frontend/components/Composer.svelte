@@ -4,6 +4,7 @@
   import iconMessagesOutlined from "images/messages-outlined.svg";
   import iconArrowUp from "images/arrow-up.svg";
 
+  // Props - currentUser is passed from parent component
   let { room, store = null, currentUser = null } = $props();
 
   let body = $state("");
@@ -27,7 +28,7 @@
   // Typing indicators via store
   function handleInput() {
     autoResize();
-    
+
     if (store && !isCurrentlyTyping && body.trim()) {
       isCurrentlyTyping = true;
       store.startTyping();
@@ -69,7 +70,7 @@
     if (!messageBody || isSubmitting || isOverLimit) return;
 
     const clientMessageId = generateClientId();
-    
+
     // Store textarea reference before any state changes
     const textarea = textareaRef;
 
@@ -85,14 +86,18 @@
     // Optimistic UI: add message immediately
     // Use div.trix-content to match server-rendered ActionText format
     if (store && currentUser) {
-      store.addOptimistic(clientMessageId, `<div class="trix-content"><p>${escapeHtml(messageBody)}</p></div>`, currentUser);
+      store.addOptimistic(
+        clientMessageId,
+        `<div class="trix-content"><p>${escapeHtml(messageBody)}</p></div>`,
+        currentUser,
+      );
     }
 
     // Clear input immediately for instant feedback
     const previousBody = body;
     body = "";
     isSubmitting = true;
-    
+
     // Reset textarea height and keep focus
     if (textarea) {
       textarea.style.height = "auto";
@@ -108,11 +113,11 @@
           "X-CSRF-Token": getCsrfToken(),
           Accept: "application/json",
         },
-        body: JSON.stringify({ 
-          message: { 
+        body: JSON.stringify({
+          message: {
             body: messageBody,
-            client_message_id: clientMessageId 
-          } 
+            client_message_id: clientMessageId,
+          },
         }),
       });
 
@@ -154,14 +159,15 @@
   function handleKeydown(event) {
     // On mobile (touch devices), only submit with send button
     // On desktop, Enter submits, Shift+Enter creates new line
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
+    const isTouchDevice =
+      "ontouchstart" in window || navigator.maxTouchPoints > 0;
+
     if (event.key === "Enter") {
       if (event.shiftKey) {
         // Shift+Enter: allow new line
         return;
       }
-      
+
       if (isTouchDevice) {
         // On mobile, Enter key from keyboard accessory should send
         // (enterkeyhint="send" handles this)
@@ -177,7 +183,8 @@
 
   // Focus input on mount (desktop only)
   onMount(() => {
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isTouchDevice =
+      "ontouchstart" in window || navigator.maxTouchPoints > 0;
     if (!isTouchDevice && textareaRef) {
       textareaRef.focus();
     }
@@ -219,7 +226,9 @@
               alt=""
             />
 
-            <div class="flex flex-column flex-item-grow min-width gap full-width">
+            <div
+              class="flex flex-column flex-item-grow min-width gap full-width"
+            >
               <textarea
                 bind:this={textareaRef}
                 bind:value={body}

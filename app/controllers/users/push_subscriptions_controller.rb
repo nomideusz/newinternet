@@ -7,8 +7,7 @@ class Users::PushSubscriptionsController < ApplicationController
     render inertia: "Users/PushSubscriptions/Index", props: {
       page: { title: "Push notification subscriptions" },
       pushSubscriptions: @push_subscriptions.map { |sub| push_subscription_json(sub) },
-      cancelUrl: last_room_visited ? room_path(last_room_visited) : root_path,
-      currentUser: UserPresenter.new(Current.user, view: :minimal).as_json
+      cancelUrl: last_room_visited ? room_path(last_room_visited) : root_path
     }
   end
 

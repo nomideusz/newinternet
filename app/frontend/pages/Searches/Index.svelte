@@ -1,5 +1,4 @@
 <script>
-  import { router } from "@inertiajs/svelte";
   import SearchResultItem from "../../components/SearchResultItem.svelte";
 
   import iconBroom from "images/broom.svg";
@@ -8,7 +7,9 @@
   import iconRemove from "images/remove.svg";
   import iconArrowUp from "images/arrow-up.svg";
 
+  // Props passed by InertiaX Frame
   let {
+    router,
     page,
     query = "",
     recentSearches = [],

@@ -14,7 +14,6 @@ class Rooms::ClosedsController < RoomsController
   end
 
   def new
-    load_sidebar_data
     @room = Rooms::Closed.new(name: DEFAULT_ROOM_NAME)
     @users = User.active.ordered
 
@@ -24,14 +23,7 @@ class Rooms::ClosedsController < RoomsController
       users: UserPresenter.collection(@users, view: :minimal),
       isOpenRoom: false,
       typeChangePath: new_rooms_open_path,
-      cancelUrl: user_sidebar_path,
-      currentUser: UserPresenter.new(Current.user, view: :minimal).as_json,
-      sidebar: {
-        directMemberships: MembershipPresenter.collection(@direct_memberships, view: :sidebar),
-        otherMemberships: MembershipPresenter.collection(@other_memberships, view: :sidebar),
-        directPlaceholderUsers: UserPresenter.collection(@direct_placeholder_users, view: :minimal),
-        canCreateRooms: Current.user.administrator? || !Current.account.settings.restrict_room_creation_to_administrators?
-      }
+      cancelUrl: user_sidebar_path
     }
   end
 
@@ -43,7 +35,6 @@ class Rooms::ClosedsController < RoomsController
   end
 
   def edit
-    load_sidebar_data
     @users = User.active.ordered
     selected_user_ids = @room.users.pluck(:id)
 
@@ -55,14 +46,7 @@ class Rooms::ClosedsController < RoomsController
       isOpenRoom: false,
       typeChangePath: edit_rooms_open_path(@room),
       cancelUrl: room_path(@room),
-      currentUser: UserPresenter.new(Current.user, view: :minimal).as_json,
-      canAdminister: Current.user.can_administer?(@room),
-      sidebar: {
-        directMemberships: MembershipPresenter.collection(@direct_memberships, view: :sidebar),
-        otherMemberships: MembershipPresenter.collection(@other_memberships, view: :sidebar),
-        directPlaceholderUsers: UserPresenter.collection(@direct_placeholder_users, view: :minimal),
-        canCreateRooms: Current.user.administrator? || !Current.account.settings.restrict_room_creation_to_administrators?
-      }
+      canAdminister: Current.user.can_administer?(@room)
     }
   end
 

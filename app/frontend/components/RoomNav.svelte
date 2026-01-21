@@ -1,17 +1,32 @@
 <script>
-  let { room, canAdminister = false } = $props();
-
+  import { getRouter } from "inertiax-svelte";
   import menuDotsHorizontal from "images/menu-dots-horizontal.svg";
 
-  // Map room type to the correct edit route
-  function getEditUrl(room) {
+  // Props
+  let { room, canAdminister = false } = $props();
+
+  // Map room type to the correct edit route and component
+  function getEditInfo(room) {
     const typeRoutes = {
-      open: "opens",
-      closed: "closeds",
-      direct: "directs",
+      open: { path: "opens", component: "Rooms/Opens/Edit" },
+      closed: { path: "closeds", component: "Rooms/Opens/Edit" },
+      direct: { path: "directs", component: "Rooms/Directs/Edit" },
     };
-    const routeType = typeRoutes[room.type] || "opens";
-    return `/rooms/${routeType}/${room.id}/edit`;
+    const info = typeRoutes[room.type] || typeRoutes.open;
+    return {
+      url: `/rooms/${info.path}/${room.id}/edit`,
+      component: info.component,
+    };
+  }
+
+  function openEditModal(event) {
+    event.preventDefault();
+    const { url } = getEditInfo(room);
+    // Use getRouter to access the modal frame's router directly
+    const router = getRouter("modal");
+    router.visit(url, {
+      preserveUrl: true,
+    });
   }
 
   $effect(() => {
@@ -30,7 +45,7 @@
   </span>
 
   {#if canAdminister}
-    <a href={getEditUrl(room)} class="btn btn--borderless">
+    <button onclick={openEditModal} class="btn btn--borderless">
       <img
         src={menuDotsHorizontal}
         width="20"
@@ -41,6 +56,6 @@
       <span class="for-screen-reader"
         >Settings for this {room.type === "direct" ? "Ping" : "room"}</span
       >
-    </a>
+    </button>
   {/if}
 </nav>

@@ -1,11 +1,23 @@
 <script>
-  import { router } from "@inertiajs/svelte";
+  import { onMount, getContext } from "svelte";
   import UserAutocomplete from "../../../components/UserAutocomplete.svelte";
 
   import iconArrowLeft from "images/arrow-left.svg";
   import iconCheck from "images/check.svg";
 
-  let { page, autocompleteUrl, cancelUrl, currentUser, sidebar = {} } = $props();
+  // Props passed by InertiaX Frame
+  let {
+    router,
+    page,
+    autocompleteUrl,
+    cancelUrl,
+    currentUser,
+    sidebar = {},
+    closeModal = null,
+  } = $props();
+
+  const ctx = getContext("inertia");
+  const isInModal = ctx?.frame === "modal";
 
   let selectedUsers = $state([]);
   let isSubmitting = $state(false);
@@ -31,8 +43,28 @@
     );
   }
 
+  onMount(() => {
+    if (!isInModal) {
+      const navEl = document.getElementById("nav");
+      if (navEl) {
+        navEl.innerHTML = `
+          <div class="flex-item-justify-start">
+            <a href="${cancelUrl || "/"}" class="btn btn--plain" data-inertia="true">
+              <img src="${iconArrowLeft}" alt="" aria-hidden="true" />
+              <span>Back</span>
+            </a>
+          </div>
+        `;
+      }
+    }
+  });
+
   function handleCancel() {
-    router.visit(cancelUrl);
+    if (isInModal && closeModal) {
+      closeModal();
+    } else {
+      router.visit(cancelUrl);
+    }
   }
 
   function handleKeydown(event) {
@@ -44,7 +76,7 @@
 
 <svelte:window onkeydown={handleKeydown} />
 
-<div class="directs directs--new flex flex-column gap">
+<div class="directs directs--new flex flex-column gap full-width">
   <form onsubmit={handleSubmit} class="flex gap flex-item-grow">
     <button
       type="button"

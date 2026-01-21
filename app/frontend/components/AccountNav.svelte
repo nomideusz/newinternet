@@ -1,17 +1,18 @@
 <script>
-  import { router } from "@inertiajs/svelte";
-
   import iconArrowLeft from "images/arrow-left.svg";
   import iconBot from "images/bot.svg";
   import iconArt from "images/art.svg";
 
-  let { canAdminister = false } = $props();
+  // Props - router passed from parent
+  let { canAdminister = false, router = null } = $props();
 
   function handleBack() {
     if (window.history.length > 1) {
       window.history.back();
-    } else {
+    } else if (router) {
       router.visit("/");
+    } else {
+      window.location.href = "/";
     }
   }
 
@@ -29,7 +30,13 @@
 <nav class="nav flex align-center gap">
   <div class="flex-item-justify-start">
     <button type="button" class="btn" onclick={handleBack}>
-      <img src={iconArrowLeft} aria-hidden="true" width="20" height="20" alt="" />
+      <img
+        src={iconArrowLeft}
+        aria-hidden="true"
+        width="20"
+        height="20"
+        alt=""
+      />
       <span class="for-screen-reader">Go back</span>
     </button>
   </div>

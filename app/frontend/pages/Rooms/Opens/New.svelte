@@ -1,121 +1,63 @@
 <script>
-  import { onMount } from "svelte";
-  import { router } from "@inertiajs/svelte";
-
+  import { onMount, getContext } from "svelte";
   import iconCheck from "images/check.svg";
   import iconEveryone from "images/everyone.svg";
+  import iconArrowLeft from "images/arrow-left.svg";
 
+  // Props passed by InertiaX Frame
   let {
-    page,
-    room = { name: "New room" },
+    router,
     users = [],
-    sidebar = {},
-    currentUser = null,
-    isOpenRoom: propIsOpenRoom = true,
-    typeChangePath,
     cancelUrl,
+    canAdminister = true, // Default to true for creator
+    closeModal = null,
   } = $props();
 
-  // Form state - extract initial value from prop (static after mount)
-  // svelte-ignore state_referenced_locally
-  let roomName = $state(room?.name || "New room");
-  let isSubmitting = $state(false);
-  let searchQuery = $state("");
-  let modalRef = $state(null);
+  const ctx = getContext("inertia");
+  const isInModal = ctx?.frame === "modal";
 
-  // Room type: true = open (everyone), false = closed (selected users)
-  // svelte-ignore state_referenced_locally
-  let isOpenRoom = $state(propIsOpenRoom);
-
-  // Selected users for closed room
+  // Form state
+  // Default to Open room initially
+  let isOpenRoom = $state(true);
+  let roomName = $state("");
   let selectedUserIds = $state(new Set());
+  let isSubmitting = $state(false);
+  let saveSuccess = $state(false);
+  let searchQuery = $state("");
 
-  // Derived state
-  let filteredUsers = $derived(
-    searchQuery
-      ? users.filter((user) =>
-          user.name.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      : users
-  );
+  // Initialize selectedUserIds with everyone if starting as open (though physically empty set implies none selected in UI logic if not everyone)
+  // Actually, mirror Edit logic: if open, implies all.
+  // But for creation, we need to decide.
+  // Logic in Edit:
+  // if (isOpenRoom) selectedUserIds = new Set(users.map(u => u.id));
+  // Let's do that.
 
-  let selectedCount = $derived(selectedUserIds.size);
-
-  onMount(() => {
-    // Focus the name input on mount
-    setTimeout(() => {
-      const input = document.querySelector('.modal-content input[type="text"]');
-      if (input) {
-        input.focus();
-        input.select();
-      }
-    }, 100);
+  $effect(() => {
+    if (isOpenRoom) {
+      // conceptually all, but we might just send empty list and let backend handle "open" status
+      // Actually Edit.svelte logic:
+      // const endpoint = isOpenRoom ? `/rooms/opens/${room.id}` : ...
+      // if (!isOpenRoom) data.user_ids = ...
+      // So creating an "open" room likely doesn't need user_ids.
+    }
   });
 
-  function handleSubmit(event) {
-    event.preventDefault();
-
-    if (!roomName.trim()) return;
-
-    // For closed rooms, must have at least one user selected
-    if (!isOpenRoom && selectedUserIds.size === 0) {
-      return;
-    }
-
-    isSubmitting = true;
-
-    if (isOpenRoom) {
-      // Create open room
-      router.post(
-        "/rooms/opens",
-        { room: { name: roomName.trim() } },
-        {
-          onFinish: () => {
-            isSubmitting = false;
-          },
-        }
-      );
-    } else {
-      // Create closed room with selected users
-      router.post(
-        "/rooms/closeds",
-        {
-          room: { name: roomName.trim() },
-          user_ids: Array.from(selectedUserIds)
-        },
-        {
-          onFinish: () => {
-            isSubmitting = false;
-          },
-        }
-      );
-    }
-  }
-
-  function handleCancel() {
-    // Use history.back() to avoid full page refresh
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      router.visit("/");
-    }
-  }
-
-  function handleBackdropClick(event) {
-    if (event.target === event.currentTarget) {
-      handleCancel();
-    }
-  }
+  let filteredUsers = $derived(
+    users.filter((u) =>
+      u.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    ),
+  );
 
   function toggleRoomType() {
     isOpenRoom = !isOpenRoom;
-    // Clear selection when switching to open
     if (isOpenRoom) {
+      selectedUserIds = new Set(users.map((u) => u.id));
+    } else {
       selectedUserIds = new Set();
     }
   }
 
-  function toggleUserSelection(userId) {
+  function toggleUser(userId) {
     const newSet = new Set(selectedUserIds);
     if (newSet.has(userId)) {
       newSet.delete(userId);
@@ -125,307 +67,431 @@
     selectedUserIds = newSet;
   }
 
-  function selectAllUsers() {
-    selectedUserIds = new Set(users.map(u => u.id));
-  }
+  onMount(() => {
+    // If open room default, maybe pre-select everyone or just treat as "open" type
+    // In Edit.svelte, `isOpenRoom` determines the ENDPOINT.
+    // So if isOpenRoom is true, we post to /rooms/opens. If false, likely /rooms/closeds (if such route exists for create).
+    // The ruby file was `new.html.erb` in `rooms/opens`.
+    // It suggests this page Creates a room.
 
-  function deselectAllUsers() {
-    selectedUserIds = new Set();
-  }
+    // Let's assume we post to /rooms/opens for open rooms.
+    // What if they toggle to closed?
+    // Edit.svelte uses `type_change_path` in ruby.
 
-  function handleKeydown(event) {
-    if (event.key === "Escape") {
-      handleCancel();
+    if (!isInModal) {
+      const navEl = document.getElementById("nav");
+      if (navEl) {
+        navEl.innerHTML = `
+          <div class="flex-item-justify-start">
+            <a href="${cancelUrl || "/"}" class="btn btn--plain" data-inertia="true">
+              <img src="${iconArrowLeft}" alt="" aria-hidden="true" />
+              <span>Back</span>
+            </a>
+          </div>
+        `;
+      }
     }
-  }
 
-  function isUserSelected(userId) {
-    return selectedUserIds.has(userId);
+    // Delay focus
+    requestAnimationFrame(() => {
+      const input = document.getElementById("room_name");
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    });
+  });
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (isSubmitting) return;
+    if (!roomName.trim()) return;
+
+    // If closed room and no users, maybe prevent? Or allow empty.
+    if (!isOpenRoom && selectedUserIds.size === 0) {
+      // Warning or allow? standard seems to be allow.
+    }
+
+    isSubmitting = true;
+
+    // Determine endpoint based on type
+    const endpoint = isOpenRoom ? "/rooms/opens" : "/rooms/closeds";
+    const data = { room: { name: roomName.trim() } };
+
+    if (!isOpenRoom) {
+      data.user_ids = Array.from(selectedUserIds);
+    }
+
+    router.post(endpoint, data, {
+      preserveScroll: true,
+      onSuccess: () => {
+        saveSuccess = true;
+        setTimeout(() => {
+          saveSuccess = false;
+          if (isInModal && closeModal) closeModal();
+          // Standard redirect happens if not modal or if backend redirects
+        }, 600);
+      },
+      onFinish: () => {
+        isSubmitting = false;
+      },
+    });
   }
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
-
 <svelte:head>
-  <title>New Room</title>
+  <title>New chat room</title>
 </svelte:head>
 
-<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-<div class="modal-backdrop" onclick={handleBackdropClick} role="presentation">
-  <div class="modal-content" bind:this={modalRef} role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <!-- Modal header -->
-    <div class="modal-header">
-      <h2 id="modal-title" class="modal-title">New Room</h2>
-      <button type="button" onclick={handleCancel} class="btn modal-close" aria-label="Close">
-        ✕
-      </button>
+<section style="view-transition-name: new-room">
+  <form onsubmit={handleSubmit} class="full-width">
+    <!-- Room Name Input -->
+    <div class="flex align-center gap margin-block-end">
+      <label class="flex-item-grow txt-large">
+        <input
+          type="text"
+          name="room[name]"
+          id="room_name"
+          bind:value={roomName}
+          class="input full-width"
+          required
+          placeholder="Name the room"
+        />
+        <span class="for-screen-reader">Name this room</span>
+      </label>
     </div>
 
-    <!-- Modal body -->
-    <form onsubmit={handleSubmit}>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="room-name" class="form-label">Room name</label>
-          <input
-            type="text"
-            id="room-name"
-            bind:value={roomName}
-            class="input full-width"
-            required
-            placeholder="Name the room"
-          />
-        </div>
+    <!-- Align with Edit.svelte: Header is just inputs. -->
 
-        <fieldset class="form-group">
-          <legend class="form-label">Access</legend>
-          <div class="access-section">
-            <div class="access-header">
-              <figure class="avatar avatar--icon">
-                <img
-                  src={iconEveryone}
-                  aria-hidden="true"
-                  alt=""
-                  class="colorize--black"
-                />
+    <hr
+      class="separator full-width borderless margin-block-start margin-block-end"
+    />
+
+    <section
+      class="room-access pad-inline-large fill-shade border-radius margin-block-end"
+    >
+      <ul class="list-none margin-none padding-none">
+        <!-- Everyone / Public Toggle -->
+        <li class="flex align-center gap padding-block-small">
+          <figure
+            class="avatar flex-item-no-shrink"
+            style="--avatar-border-radius: 0; --avatar-size: 3em;"
+          >
+            <img
+              src={iconEveryone}
+              aria-hidden="true"
+              alt=""
+              class="colorize--black"
+              style="background-color: transparent"
+            />
+          </figure>
+
+          <div class="min-width">
+            <div class="overflow-ellipsis"><strong>Everyone</strong></div>
+          </div>
+
+          <hr class="separator flex-item-grow" aria-hidden="true" />
+
+          <button
+            type="button"
+            class="btn--faux flex-center"
+            onclick={toggleRoomType}
+          >
+            <span class="switch">
+              <input
+                type="checkbox"
+                class="switch__input"
+                checked={isOpenRoom}
+                readonly
+              />
+              <span class="switch__btn round"></span>
+            </span>
+          </button>
+        </li>
+
+        <hr class="separator full-width" style="--border-style: solid" />
+
+        {#if users.length > 20}
+          <li class="pad-block-end">
+            <label class="flex align-center gap">
+              <input
+                type="search"
+                bind:value={searchQuery}
+                placeholder="Filter…"
+                class="input input--transparent full-width"
+              />
+            </label>
+            <hr class="separator full-width" />
+          </li>
+        {/if}
+
+        <!-- Users -->
+        {#each filteredUsers as user (user.id)}
+          {@const isSelected = isOpenRoom || selectedUserIds.has(user.id)}
+          <li class="user-row" class:user-row--selectable={!isOpenRoom}>
+            <button
+              type="button"
+              class="user-row__btn"
+              onclick={() => !isOpenRoom && toggleUser(user.id)}
+              disabled={isOpenRoom}
+            >
+              <figure
+                class="avatar flex-item-no-shrink"
+                style="--avatar-size: 3em;"
+              >
+                {#if user.avatar_url}
+                  <img src={user.avatar_url} alt="" />
+                {:else}
+                  <span class="avatar__initials">{user.initials || "?"}</span>
+                {/if}
               </figure>
 
-              <div class="access-info">
-                <strong>Everyone</strong>
-                <span class="txt-small translucent">
-                  {#if isOpenRoom}
-                    All {users.length} members can access
-                  {:else}
-                    Toggle on for open access
-                  {/if}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onclick={toggleRoomType}
-                class="switch-btn"
-                title={isOpenRoom ? "Switch to closed room" : "Switch to open room"}
-              >
-                <span class="switch">
-                  <span class="switch__track" class:switch__track--on={isOpenRoom}></span>
-                  <span class="switch__thumb" class:switch__thumb--on={isOpenRoom}></span>
-                </span>
-              </button>
-            </div>
-
-            {#if !isOpenRoom}
-              <div class="selection-controls">
-                <span class="txt-small">{selectedCount} of {users.length} selected</span>
-                <div class="selection-buttons">
-                  <button type="button" class="btn btn--small" onclick={selectAllUsers}>All</button>
-                  <button type="button" class="btn btn--small" onclick={deselectAllUsers}>None</button>
+              <div class="min-width txt-align-left">
+                <div class="overflow-ellipsis">
+                  <strong>{user.name}</strong>
                 </div>
               </div>
-            {/if}
 
-            {#if users.length > 10}
-              <div class="search-box">
-                <input
-                  type="text"
-                  bind:value={searchQuery}
-                  class="input full-width"
-                  placeholder="Search members..."
+              <hr class="separator flex-item-grow" aria-hidden="true" />
+
+              <span
+                class="user-row__check flex-item-no-shrink"
+                class:user-row__check--visible={isSelected}
+              >
+                <img
+                  src={iconCheck}
+                  alt=""
+                  width="20"
+                  height="20"
+                  class="adaptive-icon"
                 />
-              </div>
-            {/if}
+              </span>
+            </button>
+          </li>
+        {/each}
+      </ul>
+    </section>
 
-            <div class="user-list">
-              {#each filteredUsers as user (user.id)}
-                <button
-                  type="button"
-                  class="user-item"
-                  class:user-item--selected={isOpenRoom || isUserSelected(user.id)}
-                  class:user-item--selectable={!isOpenRoom}
-                  onclick={() => !isOpenRoom && toggleUserSelection(user.id)}
-                  disabled={isOpenRoom}
-                >
-                  <figure class="avatar">
-                    {#if user.avatar_url}
-                      <img src={user.avatar_url} alt={user.name} />
-                    {:else}
-                      <span class="avatar__initials">{user.initials || "?"}</span>
-                    {/if}
-                  </figure>
-
-                  <div class="user-info">
-                    <strong>{user.name}</strong>
-                    {#if user.title}
-                      <span class="txt-small translucent">{user.title}</span>
-                    {/if}
-                  </div>
-
-                  {#if isOpenRoom || isUserSelected(user.id)}
-                    <span class="access-badge">✓</span>
-                  {:else}
-                    <span class="access-badge access-badge--empty"></span>
-                  {/if}
-                </button>
-              {/each}
-            </div>
-          </div>
-        </fieldset>
-      </div>
-
-      <!-- Modal footer -->
-      <div class="modal-footer">
-        <button
-          type="button"
-          onclick={handleCancel}
-          class="btn"
-          disabled={isSubmitting}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          class="btn btn--reversed"
-          disabled={isSubmitting || !roomName.trim() || (!isOpenRoom && selectedCount === 0)}
-        >
-          {#if isSubmitting}
-            Creating...
-          {:else}
-            <img src={iconCheck} width="16" height="16" aria-hidden="true" alt="" />
-            Create {isOpenRoom ? "Open" : "Closed"} Room
-          {/if}
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
+    <!-- Save Button -->
+    <button
+      type="submit"
+      class="save-btn"
+      class:save-btn--success={saveSuccess}
+      disabled={isSubmitting || !roomName}
+      aria-busy={isSubmitting}
+    >
+      {#if isSubmitting}
+        <span class="save-btn__dots">
+          <span class="save-btn__dot"></span>
+          <span class="save-btn__dot"></span>
+          <span class="save-btn__dot"></span>
+        </span>
+      {:else}
+        <img
+          src={iconCheck}
+          aria-hidden="true"
+          alt=""
+          width="20"
+          height="20"
+          class="icon-check"
+        />
+      {/if}
+      <span class="for-screen-reader">Create Room</span>
+    </button>
+  </form>
+</section>
 
 <style>
-  /* Component-specific styles only */
-  /* Common modal, form, and user-item styles are in shared.css */
+  /* Copied styling from Edit.svelte for consistency */
+  .room-access {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
 
-  /* Custom switch control for room type toggle */
-  .switch-btn {
+  .room-access ul {
+    padding-left: 0;
+    margin: 0;
+  }
+
+  .user-row {
+    list-style: none;
+    padding: 0.5em 0;
+    margin-left: 0;
+  }
+
+  .user-row__btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    width: 100%;
+    padding: 0;
+    margin: 0;
     background: none;
     border: none;
+    color: inherit;
+    text-align: left;
+    cursor: default;
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .user-row__btn:hover,
+  .user-row__btn:focus,
+  .user-row__btn:active {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: none;
+  }
+
+  .user-row--selectable .user-row__btn {
     cursor: pointer;
-    padding: 0.25rem;
   }
 
-  .switch {
-    display: inline-flex;
-    position: relative;
-    width: 2.75rem;
-    height: 1.5rem;
+  .user-row--selectable:hover {
+    opacity: 0.8;
   }
 
-  .switch__track {
-    position: absolute;
-    inset: 0;
-    background: var(--color-border);
-    border-radius: 1rem;
-    transition: background 0.2s;
+  .user-row__check {
+    opacity: 0;
+    transition: opacity 150ms ease;
   }
 
-  .switch__track--on {
-    background: var(--color-selected-dark);
+  .user-row__check--visible {
+    opacity: 1;
   }
 
-  .switch__thumb {
-    position: absolute;
-    top: 0.2rem;
-    left: 0.2rem;
-    width: 1.1rem;
-    height: 1.1rem;
-    background: white;
+  /* Save button */
+  .save-btn {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: 3rem auto 0;
+    padding: 0;
+    border: none;
     border-radius: 50%;
-    transition: transform 0.2s;
+    background: #ffffff; /* Explicitly white */
+    color: #000;
+    box-shadow: 0 2px 8px oklch(0% 0 0 / 0.15);
+    cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
   }
 
-  .switch__thumb--on {
-    transform: translateX(1.25rem);
+  /* Dark mode override for save button */
+  :global(:root[data-theme="dark"]) .save-btn {
+    background: #333333;
+    color: #ffffff;
+    border: 1px solid #444;
   }
 
-  /* Selection controls bar */
-  .selection-controls {
+  /* Ensure icon is white in dark mode within the save button */
+  :global(:root[data-theme="dark"]) .save-btn .icon-check {
+    filter: invert(1);
+  }
+
+  /* If we used adaptive-icon class, it might double invert if generic rule applies. 
+     Safe to just manually handle .icon-check inside .save-btn for dark mode here 
+     and remove specific class from HTML if needed, or rely on this specificity. */
+
+  .save-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px oklch(0% 0 0 / 0.2);
+  }
+
+  .save-btn:disabled {
+    cursor: wait;
+    opacity: 0.7;
+  }
+
+  .save-btn--success {
+    background: var(--color-success, #22c55e);
+  }
+
+  /* Animated dots */
+  .save-btn__dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .save-btn__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: dotPulse 1.4s ease-in-out infinite;
+  }
+
+  .save-btn__dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .save-btn__dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes dotPulse {
+    0%,
+    80%,
+    100% {
+      opacity: 0.3;
+      transform: scale(0.8);
+    }
+    40% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .padding-block-small {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+  }
+
+  .pad-inline-large {
+    padding-inline: 1.5rem;
+  }
+
+  .pad-block-end {
+    padding-bottom: 0.5rem;
+  }
+
+  .flex-center {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-    border-top: 1px solid var(--color-border);
-    background: rgba(0, 0, 0, 0.1);
   }
 
-  .selection-buttons {
-    display: flex;
-    gap: 0.5rem;
+  /* Adaptive icon color for dark mode */
+  :global(:root[data-theme="dark"]) .adaptive-icon {
+    filter: invert(1) !important;
   }
 
-  .btn--small {
-    --btn-padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+  @media (prefers-color-scheme: dark) {
+    .adaptive-icon {
+      filter: invert(1) !important;
+    }
   }
 
-  .search-box {
-    padding: 0.5rem 1rem;
-    border-top: 1px solid var(--color-border);
+  .margin-block-end {
+    margin-block-end: 1.5rem;
   }
 
-  /* Access/user list section */
-  .access-section {
-    background: var(--color-message-bg);
-    border-radius: 0.5rem;
-    overflow: hidden;
+  .margin-block-start {
+    margin-block-start: 1.5rem;
   }
 
-  .access-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
+  /* Override panel width constraints if any */
+  :global(.panel) {
+    width: 100%;
+    max-width: 100%;
   }
 
-  .access-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-  }
-
-  .user-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-
-  .user-info strong {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .access-badge {
-    color: var(--color-selected-dark);
-    font-size: 0.875rem;
-    width: 1.25rem;
-    text-align: center;
-  }
-
-  .access-badge--empty {
-    opacity: 0.3;
-  }
-
-  .access-badge--empty::before {
-    content: "○";
-  }
-
-  .avatar--icon {
-    --avatar-size: 2.5rem;
-    background: transparent;
-    flex-shrink: 0;
-  }
-
-  .avatar--icon img {
-    width: 1.5rem;
-    height: 1.5rem;
+  .margin-none {
+    margin: 0 !important;
   }
 </style>

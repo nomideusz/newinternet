@@ -1,18 +1,16 @@
 <script>
-  import { router } from "@inertiajs/svelte"
+  // Props passed by InertiaX Frame
+  let { router, message, timestamp, user = null } = $props();
 
-  // Svelte 5 syntax
-  let { message, timestamp, user = null } = $props()
-
-  let clickCount = $state(0)
+  let clickCount = $state(0);
 
   function handleClick() {
-    clickCount++
+    clickCount++;
   }
 
   function navigateDemo() {
     // Inertia navigation - no full page reload!
-    router.reload({ only: ["timestamp"] })
+    router.reload({ only: ["timestamp"] });
   }
 </script>
 
@@ -31,9 +29,7 @@
   <div class="demo-card">
     <h2>Svelte Reactivity</h2>
     <p>Click count: <strong>{clickCount}</strong></p>
-    <button onclick={handleClick} class="btn btn--primary">
-      Click me!
-    </button>
+    <button onclick={handleClick} class="btn btn--primary"> Click me! </button>
   </div>
 
   <div class="demo-card">

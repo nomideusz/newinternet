@@ -7,7 +7,6 @@ class Accounts::UsersController < ApplicationController
     render inertia: "Accounts/Users/Index", props: {
       users: users.map { |u| user_presenter(u) },
       account: account_presenter,
-      currentUser: user_presenter(Current.user),
       canAdminister: Current.user.can_administer?,
       sidebar: sidebar_props
     }

@@ -1,16 +1,17 @@
 <script>
-  import { router } from "@inertiajs/svelte";
-
   import iconArrowLeft from "images/arrow-left.svg";
   import iconLogout from "images/logout.svg";
 
-  let { currentUser } = $props();
+  // Props - router passed from parent
+  let { router = null } = $props();
 
   function handleBack() {
     if (window.history.length > 1) {
       window.history.back();
-    } else {
+    } else if (router) {
       router.visit("/");
+    } else {
+      window.location.href = "/";
     }
   }
 
@@ -39,7 +40,9 @@
     methodInput.value = "delete";
     form.appendChild(methodInput);
 
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    const csrfToken = document.querySelector(
+      'meta[name="csrf-token"]',
+    )?.content;
     if (csrfToken) {
       const csrfInput = document.createElement("input");
       csrfInput.type = "hidden";
@@ -64,7 +67,14 @@
 <nav class="nav flex align-center gap">
   <div class="flex-item-justify-start">
     <button type="button" class="btn" onclick={handleBack}>
-      <img src={iconArrowLeft} aria-hidden="true" width="20" height="20" alt="" />
+      <img
+        src={iconArrowLeft}
+        aria-hidden="true"
+        width="20"
+        height="20"
+        alt=""
+        class="adaptive-icon"
+      />
       <span class="for-screen-reader">Go back</span>
     </button>
   </div>
@@ -73,8 +83,26 @@
 
   <div class="flex-item-justify-end">
     <button type="button" class="btn" onclick={handleLogout}>
-      <img src={iconLogout} aria-hidden="true" width="20" height="20" alt="" />
+      <img
+        src={iconLogout}
+        aria-hidden="true"
+        width="20"
+        height="20"
+        alt=""
+        class="adaptive-icon"
+      />
       <span class="for-screen-reader">Log out</span>
     </button>
   </div>
 </nav>
+
+<style>
+  :global(:root[data-theme="dark"]) .adaptive-icon {
+    filter: invert(1) !important;
+  }
+  @media (prefers-color-scheme: dark) {
+    .adaptive-icon {
+      filter: invert(1) !important;
+    }
+  }
+</style>
